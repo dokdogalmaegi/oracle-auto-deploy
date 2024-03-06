@@ -1,2 +1,4 @@
 *.sql
 *.json
+node_modules
+!package.json
