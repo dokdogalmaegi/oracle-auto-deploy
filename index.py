@@ -1,3 +1,4 @@
+import json
 import cx_Oracle
 
 def compile_package(connection, package_file_path):
@@ -12,12 +13,15 @@ def compile_package(connection, package_file_path):
         print("Error occurred while compiling package:", e)
 
 def main():
+    with open('auth.json', 'r') as json_file:
+        auth_config = json.load(json_file)
+
     # Oracle 계정 정보 설정
-    username = 'username'
-    password = 'password'
-    host = 'host'
-    port = 'port'
-    service_name = 'service_name'
+    username = auth_config['username']
+    password = auth_config['password']
+    host = auth_config['host']
+    port = auth_config['port']
+    service_name = auth_config['service_name']
 
     # Oracle에 연결
     dsn_tns = cx_Oracle.makedsn(host, port, service_name=service_name)
