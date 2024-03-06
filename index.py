@@ -8,7 +8,7 @@ def compile_package(connection, package_file_path, charset='utf-8'):
             cursor = connection.cursor()
             cursor.execute(package_sql)
             cursor.close()
-            print("Package compiled successfully.")
+            print(f"{package_file_path}, Package compiled successfully.")
     except Exception as e:
         print("Error occurred while compiling package:", e)
 
@@ -29,18 +29,19 @@ def main():
 
     print("Oracle connected successfully.")
     
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM STD_STUDY WHERE ROWNUM <= 5')
-    for row in cursor:
-        print(row)
+    # cursor = connection.cursor()
+    # cursor.execute('SELECT * FROM STD_STUDY WHERE ROWNUM <= 5')
+    # for row in cursor:
+    #     print(row)
 
-    cursor.close()
+    # cursor.close()
 
     # 컴파일할 패키지 파일 경로 설정
-    # package_file_path = 'your_package_file.sql'
+    package_file_name = 'MOX_VERIFY_RESULT'
 
     # 패키지 컴파일 실행
-    # compile_package(connection, package_file_path, 'euc-kr')
+    compile_package(connection, f'{package_file_name}_SPEC.sql', 'euc-kr')
+    compile_package(connection, f'{package_file_name}_BODY.sql', 'euc-kr')
 
     # Oracle 연결 종료
     connection.close()
