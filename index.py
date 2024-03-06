@@ -1,9 +1,9 @@
 import json
 import cx_Oracle
 
-def compile_package(connection, package_file_path):
+def compile_package(connection, package_file_path, charset='utf-8'):
     try:
-        with open(package_file_path, 'r') as file:
+        with open(package_file_path, 'r', encoding=charset) as file:
             package_sql = file.read()
             cursor = connection.cursor()
             cursor.execute(package_sql)
@@ -40,7 +40,7 @@ def main():
     # package_file_path = 'your_package_file.sql'
 
     # 패키지 컴파일 실행
-    # compile_package(connection, package_file_path)
+    # compile_package(connection, package_file_path, 'euc-kr')
 
     # Oracle 연결 종료
     connection.close()
