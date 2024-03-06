@@ -6,11 +6,12 @@ async function compilePackage(connection, packageFilePath) {
   try {
     // UTF-8을 EUC-KR로 변환
     const sql = fs.readFileSync(packageFilePath, "binary");
-    const packageSql = iconv.decode(Buffer.from(sql, "binary"), "euc-kr");
-    console.log(packageSql);
+    const packageSql = iconv
+      .decode(Buffer.from(sql, "binary"), "euc-kr")
+      .toString();
 
-    // const cursor = await connection.execute(packageSql);
-    // console.log(`${packageFilePath}, Package compiled successfully.`);
+    const cursor = await connection.execute(packageSql);
+    console.log(`${packageFilePath}, Package compiled successfully.`);
   } catch (error) {
     console.error("Error occurred while compiling package:", error);
   }
