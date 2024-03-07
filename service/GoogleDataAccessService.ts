@@ -42,6 +42,13 @@ export class GoogleSheet {
     return await this.#getValueOf(range);
   }
 
+  async getOneCellValuesOf(
+    cell: string,
+    sheetId: string = ""
+  ): Promise<string[][] | undefined> {
+    return await this.getValuesOf(cell, cell, sheetId);
+  }
+
   async #getValueOf(range: string): Promise<string[][] | undefined> {
     const {
       data: { values },
