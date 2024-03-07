@@ -126,6 +126,24 @@ export class GoogleSheet {
     });
   }
 
+  #getColumnAlphabet = (columnIdx: number) => {
+    const ALPHABET_A_ASCII = "A".charCodeAt(0);
+    const ALPHABET_Z_ASCII = "Z".charCodeAt(0);
+
+    const cellColumnIdAlphabetASCII = ALPHABET_A_ASCII + columnIdx;
+    let cellColumnIdAlphabet = "";
+    if (cellColumnIdAlphabetASCII > ALPHABET_Z_ASCII) {
+      cellColumnIdAlphabet = `A${String.fromCharCode(
+        ALPHABET_A_ASCII + (cellColumnIdAlphabetASCII - ALPHABET_Z_ASCII - 1)
+      )}`;
+    } else {
+      // eslint-disable-next-line no-unused-vars
+      cellColumnIdAlphabet = String.fromCharCode(cellColumnIdAlphabetASCII);
+    }
+
+    return cellColumnIdAlphabet;
+  };
+
   async getHeaderColumnFromTwoRows(start = "A1", end = "AZ2") {
     const range = `${start}:${end}`;
 
@@ -140,6 +158,7 @@ export class GoogleSheet {
       label: string;
       rowSpan: number;
       colSpan: number;
+      column: string;
     }[] = [];
     for (let idx = 0; idx < firstRows.length; idx++) {
       const secondRowValue = secondRows[idx];
@@ -160,12 +179,14 @@ export class GoogleSheet {
           label: `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
           rowSpan,
           colSpan: colSpan + 1,
+          column: this.#getColumnAlphabet(idx),
         });
       } else {
         headerColumn.push({
           label: prefixLabel.replace("\n", ""),
           rowSpan,
           colSpan: 1,
+          column: this.#getColumnAlphabet(idx),
         });
       }
     }
