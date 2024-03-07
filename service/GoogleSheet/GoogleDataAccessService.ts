@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 
-import { ValueInputOption, InsertDataOption } from "./enums/GoogleEnums";
+import { ValueInputOption, InsertDataOption } from "../enums/GoogleEnums";
 
 import fs from "fs";
 import path from "path";
