@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../../app"; // Express 앱의 주요 파일
+import app from "../../../../app"; // Express 앱의 주요 파일
 
 describe("GET /api/v1/alive", () => {
   let response: any;

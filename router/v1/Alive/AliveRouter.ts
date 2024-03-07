@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { SuccessResponseData } from "../../utils/ResponseUtils";
+import { SuccessResponseData } from "../../../utils/ResponseUtils";
 
 const aliveV1Router: Router = Router();
 
