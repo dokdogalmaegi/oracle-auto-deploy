@@ -1,4 +1,5 @@
 *.sql
-*.json
+auth.json
 node_modules
-!package.json
+*.js
+!test.js
