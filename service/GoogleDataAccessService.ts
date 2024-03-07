@@ -3,10 +3,10 @@ import { google } from "googleapis";
 import { ValueInputOption, InsertDataOption } from "./enums/GoogleEnums";
 
 import fs from "fs";
+import path from "path";
 
-const apiAuthJson = JSON.parse(
-  fs.readFileSync("../config/apiAuth.json", "utf8")
-);
+const apiAuthPath = path.resolve(__dirname, "../config/apiAuth.json");
+const apiAuthJson = JSON.parse(fs.readFileSync(apiAuthPath, "utf8"));
 
 const { client_email: clientEmail, private_key: privateKey } = apiAuthJson;
 
