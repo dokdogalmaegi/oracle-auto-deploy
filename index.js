@@ -48,6 +48,7 @@ async function main() {
 
     // Oracle 연결 종료
     await connection.close();
+    console.log("Oracle connection closed.");
   } catch (error) {
     console.error("An error occurred:", error);
   }
