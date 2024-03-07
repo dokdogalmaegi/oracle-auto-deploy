@@ -1,8 +1,8 @@
 import { Router } from "express";
-import aliveV1Router from "./v1/alive";
+import aliveV1Router from "./v1/AliveRouter";
 
-const apiV1Router: Router = Router();
+const ApiV1Router: Router = Router();
 
-apiV1Router.use("/alive", aliveV1Router);
+ApiV1Router.use("/alive", aliveV1Router);
 
-export default apiV1Router;
+export default ApiV1Router;

@@ -3,3 +3,4 @@ auth.json
 node_modules
 *.js
 !test.js
+/config/*.json
