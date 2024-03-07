@@ -5,9 +5,9 @@ const RESPONSE = {
 
 class ResponseData {
   #status: string;
-  #resultMsg: string;
+  #message: string;
 
-  constructor(status: string, resultMsg: string) {
+  constructor(status: string, message: string) {
     const isValidStatus = Object.entries(RESPONSE).filter(
       ([key, value]) => value === status
     );
@@ -16,13 +16,13 @@ class ResponseData {
     }
 
     this.#status = status;
-    this.#resultMsg = resultMsg;
+    this.#message = message;
   }
 
   get json() {
     return {
       status: this.#status,
-      resultMsg: this.#resultMsg,
+      message: this.#message,
     };
   }
 }
@@ -30,8 +30,8 @@ class ResponseData {
 export class SuccessResponseData extends ResponseData {
   #data: any;
 
-  constructor(resultMsg: string, data: any) {
-    super(RESPONSE.SUCCESS, resultMsg);
+  constructor(message: string, data: any = null) {
+    super(RESPONSE.SUCCESS, message);
 
     if (data instanceof Error) {
       throw new Error(
@@ -53,8 +53,8 @@ export class SuccessResponseData extends ResponseData {
 export class FailResponseData extends ResponseData {
   #error: Error;
 
-  constructor(resultMsg: string, error: Error) {
-    super(RESPONSE.FAIL, resultMsg);
+  constructor(message: string, error: Error) {
+    super(RESPONSE.FAIL, message);
 
     this.#error = error;
   }
@@ -62,6 +62,7 @@ export class FailResponseData extends ResponseData {
   get json() {
     return {
       ...super.json,
+      message: this.#error.message,
       error: this.#error,
     };
   }
