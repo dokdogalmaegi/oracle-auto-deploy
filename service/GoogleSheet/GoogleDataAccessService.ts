@@ -5,7 +5,7 @@ import { ValueInputOption, InsertDataOption } from "../enums/GoogleEnums";
 import fs from "fs";
 import path from "path";
 
-const apiAuthPath = path.resolve(__dirname, "../config/apiAuth.json");
+const apiAuthPath = path.resolve(__dirname, "../../config/apiAuth.json");
 const apiAuthJson = JSON.parse(fs.readFileSync(apiAuthPath, "utf8"));
 
 const { client_email: clientEmail, private_key: privateKey } = apiAuthJson;
@@ -16,9 +16,7 @@ export class GoogleSheet {
   #spreadSheetId: string;
 
   constructor(spreadSheetId: string) {
-    const authorize = new google.auth.JWT(clientEmail, undefined, privateKey, [
-      SHEET_API_URL,
-    ]);
+    const authorize = new google.auth.JWT(clientEmail, undefined, privateKey, [SHEET_API_URL]);
 
     this.#sheetApi = google.sheets({
       version: "v4",
@@ -28,11 +26,7 @@ export class GoogleSheet {
     this.#spreadSheetId = spreadSheetId;
   }
 
-  async getValuesOf(
-    startCell: string,
-    endCell: string,
-    sheetId: string = ""
-  ): Promise<string[][] | undefined> {
+  async getValuesOf(startCell: string, endCell: string, sheetId: string = ""): Promise<string[][] | undefined> {
     let range = `${startCell}:${endCell}`;
 
     if (sheetId.length > 0) {
@@ -42,10 +36,7 @@ export class GoogleSheet {
     return await this.#getValueOf(range);
   }
 
-  async getOneCellValuesOf(
-    cell: string,
-    sheetId: string = ""
-  ): Promise<string[][] | undefined> {
+  async getOneCellValuesOf(cell: string, sheetId: string = ""): Promise<string[][] | undefined> {
     return await this.getValuesOf(cell, cell, sheetId);
   }
 
@@ -83,11 +74,7 @@ export class GoogleSheet {
     await this.#insertValueToCell(range, resource);
   }
 
-  async insertValuesToRow(
-    start: string,
-    end: string,
-    value: any[]
-  ): Promise<void> {
+  async insertValuesToRow(start: string, end: string, value: any[]): Promise<void> {
     const range = `${start}:${end}`;
     const resource = {
       values: [value],
@@ -121,9 +108,7 @@ export class GoogleSheet {
     options: { plusNumber: number } = { plusNumber: 0 }
   ): Promise<void> {
     const lastNumber = await this.#getLastNumberByCell(start);
-    const range = `${start}${lastNumber + options.plusNumber}:${end}${
-      lastNumber + options.plusNumber
-    }`;
+    const range = `${start}${lastNumber + options.plusNumber}:${end}${lastNumber + options.plusNumber}`;
     const resource = {
       values: [values],
     };
@@ -139,5 +124,52 @@ export class GoogleSheet {
       range,
       resource,
     });
+  }
+
+  async getHeaderColumnFromTwoRows(start = "A1", end = "AZ2") {
+    const range = `${start}:${end}`;
+
+    const result = await this.#getValueOf(range);
+    if (result === undefined) {
+      return [];
+    }
+    const firstRows = result[0];
+    const secondRows = result[1];
+
+    const headerColumn: {
+      label: string;
+      rowSpan: number;
+      colSpan: number;
+    }[] = [];
+    for (let idx = 0; idx < firstRows.length; idx++) {
+      const secondRowValue = secondRows[idx];
+
+      let rowSpan = 1;
+      if (secondRowValue === undefined || secondRowValue.length === 0) {
+        rowSpan = 2;
+      }
+
+      let prefixLabel = firstRows[idx];
+      let colSpan = 1;
+      if (secondRowValue !== undefined && secondRowValue.length > 0 && rowSpan === 1) {
+        if (prefixLabel.length === 0) {
+          colSpan = headerColumn[headerColumn.length - 1].colSpan;
+          prefixLabel = firstRows[headerColumn.length - colSpan + 1];
+        }
+        headerColumn.push({
+          label: `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
+          rowSpan,
+          colSpan: colSpan + 1,
+        });
+      } else {
+        headerColumn.push({
+          label: prefixLabel.replace("\n", ""),
+          rowSpan,
+          colSpan: 1,
+        });
+      }
+    }
+
+    return headerColumn;
   }
 }
