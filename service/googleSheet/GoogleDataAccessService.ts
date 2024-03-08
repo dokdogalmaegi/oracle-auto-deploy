@@ -145,8 +145,11 @@ export class GoogleSheet {
     return cellColumnIdAlphabet;
   }
 
-  async getHeaderColumnFromTwoRows(start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
-    const range = `${start}:${end}`;
+  async getHeaderColumnFromTwoRows(sheetId = "", start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
+    let range = `${start}:${end}`;
+    if (sheetId.length > 0) {
+      range = `${sheetId}!${range}`;
+    }
 
     const result = await this.#getValueOf(range);
     if (result === undefined) {

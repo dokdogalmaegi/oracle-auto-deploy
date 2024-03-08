@@ -3,4 +3,5 @@ auth.json
 node_modules
 *.js
 !oracle.js
+!init.js
 /config/*.json
