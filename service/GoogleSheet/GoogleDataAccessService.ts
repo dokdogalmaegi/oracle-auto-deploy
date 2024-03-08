@@ -156,35 +156,27 @@ export class GoogleSheet {
 
     const headerColumn: {
       label: string;
-      rowSpan: number;
       colSpan: number;
       column: string;
     }[] = [];
     for (let idx = 0; idx < firstRows.length; idx++) {
       const secondRowValue = secondRows[idx];
 
-      let rowSpan = 1;
-      if (secondRowValue === undefined || secondRowValue.length === 0) {
-        rowSpan = 2;
-      }
-
       let prefixLabel = firstRows[idx];
       let colSpan = 1;
-      if (secondRowValue !== undefined && secondRowValue.length > 0 && rowSpan === 1) {
+      if (secondRowValue !== undefined && secondRowValue.length > 0) {
         if (prefixLabel.length === 0) {
           colSpan = headerColumn[headerColumn.length - 1].colSpan;
           prefixLabel = firstRows[headerColumn.length - colSpan + 1];
         }
         headerColumn.push({
           label: `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
-          rowSpan,
           colSpan: colSpan + 1,
           column: this.#getColumnAlphabet(idx),
         });
       } else {
         headerColumn.push({
           label: prefixLabel.replace("\n", ""),
-          rowSpan,
           colSpan: 1,
           column: this.#getColumnAlphabet(idx),
         });

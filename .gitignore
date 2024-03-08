@@ -2,5 +2,5 @@
 auth.json
 node_modules
 *.js
-!test.js
+!oracle.js
 /config/*.json
