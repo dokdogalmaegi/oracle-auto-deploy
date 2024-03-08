@@ -17,6 +17,10 @@ export class GoogleSheet {
   #spreadSheetId: string;
 
   constructor(spreadSheetId: string) {
+    if (!spreadSheetId) {
+      throw new Error("SpreadSheetId is required");
+    }
+
     const authorize = new google.auth.JWT(clientEmail, undefined, privateKey, [SHEET_API_URL]);
 
     this.#sheetApi = google.sheets({

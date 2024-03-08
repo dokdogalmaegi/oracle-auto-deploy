@@ -3,6 +3,8 @@ import ApiV1Router from "./router/MainRouter";
 import dotenv from "dotenv";
 import path from "path";
 
+dotenv.config({ path: path.resolve(__dirname, "./config/.env") });
+
 const app: Express = express();
 const port: number = Number(process.env.PORT) || 3000;
 
@@ -14,7 +16,5 @@ app.use("/api/v1", ApiV1Router);
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 });
-
-dotenv.config({ path: path.resolve(__dirname, "./config/.env") });
 
 export default app;
