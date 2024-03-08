@@ -1,2 +1,7 @@
 *.sql
-*.json
+auth.json
+node_modules
+*.js
+!oracle.js
+.env
+/config/*.json
