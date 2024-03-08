@@ -4,7 +4,7 @@ import { ValueInputOption, InsertDataOption } from "../enums/GoogleEnums";
 
 import fs from "fs";
 import path from "path";
-import { HeaderColumn } from "../../model/GoogleSheet/HeaderColumn";
+import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
 
 const apiAuthPath = path.resolve(__dirname, "../../config/apiAuth.json");
 const apiAuthJson = JSON.parse(fs.readFileSync(apiAuthPath, "utf8"));
