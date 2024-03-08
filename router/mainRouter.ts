@@ -1,6 +1,6 @@
 import { Router } from "express";
-import aliveV1Router from "./v1/Alive/AliveRouter";
-import releasesV1Router from "./v1/Releases/ReleasesRouter";
+import aliveV1Router from "./v1/alive/AliveRouter";
+import releasesV1Router from "./v1/releases/ReleasesRouter";
 
 const ApiV1Router: Router = Router();
 

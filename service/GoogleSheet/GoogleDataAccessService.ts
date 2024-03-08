@@ -4,13 +4,14 @@ import { ValueInputOption, InsertDataOption } from "../enums/GoogleEnums";
 
 import fs from "fs";
 import path from "path";
+import { HeaderColumn } from "../../model/GoogleSheet/HeaderColumn";
 
 const apiAuthPath = path.resolve(__dirname, "../../config/apiAuth.json");
 const apiAuthJson = JSON.parse(fs.readFileSync(apiAuthPath, "utf8"));
-
 const { client_email: clientEmail, private_key: privateKey } = apiAuthJson;
 
 const SHEET_API_URL = "https://www.googleapis.com/auth/spreadsheets";
+
 export class GoogleSheet {
   #sheetApi: any;
   #spreadSheetId: string;
@@ -126,7 +127,7 @@ export class GoogleSheet {
     });
   }
 
-  #getColumnAlphabet = (columnIdx: number) => {
+  #getColumnAlphabet(columnIdx: number): string {
     const ALPHABET_A_ASCII = "A".charCodeAt(0);
     const ALPHABET_Z_ASCII = "Z".charCodeAt(0);
 
@@ -142,9 +143,12 @@ export class GoogleSheet {
     }
 
     return cellColumnIdAlphabet;
-  };
+  }
 
-  async getHeaderColumnFromTwoRows(start = "A1", end = "AZ2") {
+  async getHeaderColumnFromTwoRows(
+    start = "A1",
+    end = "AZ2"
+  ): Promise<{ label: string; colSpan: number; column: string }[]> {
     const range = `${start}:${end}`;
 
     const result = await this.#getValueOf(range);
@@ -154,11 +158,12 @@ export class GoogleSheet {
     const firstRows = result[0];
     const secondRows = result[1];
 
-    const headerColumn: {
-      label: string;
-      colSpan: number;
-      column: string;
-    }[] = [];
+    const headerColumn: HeaderColumn[] = [];
+    // const headerColumn: {
+    //   label: string;
+    //   colSpan: number;
+    //   column: string;
+    // }[] = [];
     for (let idx = 0; idx < firstRows.length; idx++) {
       const secondRowValue = secondRows[idx];
 
@@ -169,17 +174,15 @@ export class GoogleSheet {
           colSpan = headerColumn[headerColumn.length - 1].colSpan;
           prefixLabel = firstRows[headerColumn.length - colSpan + 1];
         }
-        headerColumn.push({
-          label: `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
-          colSpan: colSpan + 1,
-          column: this.#getColumnAlphabet(idx),
-        });
+        headerColumn.push(
+          new HeaderColumn(
+            `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
+            colSpan + 1,
+            this.#getColumnAlphabet(idx)
+          )
+        );
       } else {
-        headerColumn.push({
-          label: prefixLabel.replace("\n", ""),
-          colSpan: 1,
-          column: this.#getColumnAlphabet(idx),
-        });
+        headerColumn.push(new HeaderColumn(prefixLabel.replace("\n", ""), 1, this.#getColumnAlphabet(idx)));
       }
     }
 
