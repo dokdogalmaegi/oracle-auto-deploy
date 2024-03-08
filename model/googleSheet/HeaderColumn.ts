@@ -8,4 +8,8 @@ export class HeaderColumn {
     this.colSpan = colSpan;
     this.column = column;
   }
+
+  equals(other: HeaderColumn): boolean {
+    return this.label === other.label && this.colSpan === other.colSpan && this.column === other.column;
+  }
 }
