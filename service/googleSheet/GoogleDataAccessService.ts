@@ -31,18 +31,18 @@ export class GoogleSheet {
     this.#spreadSheetId = spreadSheetId;
   }
 
-  async getValuesOf(startCell: string, endCell: string, sheetId: string = ""): Promise<string[][] | undefined> {
+  async getValuesOf(startCell: string, endCell: string, sheetName: string = ""): Promise<string[][] | undefined> {
     let range = `${startCell}:${endCell}`;
 
-    if (sheetId.length > 0) {
-      range = `${sheetId}!${range}`;
+    if (sheetName.length > 0) {
+      range = `${sheetName}!${range}`;
     }
 
     return await this.#getValueOf(range);
   }
 
-  async getOneCellValuesOf(cell: string, sheetId: string = ""): Promise<string[][] | undefined> {
-    return await this.getValuesOf(cell, cell, sheetId);
+  async getOneCellValuesOf(cell: string, sheetName: string = ""): Promise<string[][] | undefined> {
+    return await this.getValuesOf(cell, cell, sheetName);
   }
 
   async #getValueOf(range: string): Promise<string[][] | undefined> {
@@ -149,10 +149,10 @@ export class GoogleSheet {
     return cellColumnIdAlphabet;
   }
 
-  async getHeaderColumnFromTwoRows(sheetId = "", start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
+  async getHeaderColumnFromTwoRows(sheetName = "", start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
     let range = `${start}:${end}`;
-    if (sheetId.length > 0) {
-      range = `${sheetId}!${range}`;
+    if (sheetName.length > 0) {
+      range = `${sheetName}!${range}`;
     }
 
     const result = await this.#getValueOf(range);
@@ -163,11 +163,6 @@ export class GoogleSheet {
     const secondRows = result[1];
 
     const headerColumn: HeaderColumn[] = [];
-    // const headerColumn: {
-    //   label: string;
-    //   colSpan: number;
-    //   column: string;
-    // }[] = [];
     for (let idx = 0; idx < firstRows.length; idx++) {
       const secondRowValue = secondRows[idx];
 

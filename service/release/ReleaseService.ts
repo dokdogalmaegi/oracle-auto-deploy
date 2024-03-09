@@ -3,12 +3,15 @@ import { Cell } from "../../model/googleSheet/Cell";
 import { Row } from "../../model/googleSheet/Row";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
 
-export const getRows = async (headerColumns: HeaderColumn[], sheetId: string = ""): Promise<Row[] | undefined> => {
+export const getRowsWithHeaderColumn = async (
+  headerColumns: HeaderColumn[],
+  sheetName: string = ""
+): Promise<Row[] | undefined> => {
   const firstColumn = headerColumns[0].column;
   const lastColumn = headerColumns[headerColumns.length - 1].column;
 
   const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
-  const rowDataList = await googleSheet.getValuesOf(`${firstColumn}3`, lastColumn);
+  const rowDataList = await googleSheet.getValuesOf(`${firstColumn}3`, lastColumn, sheetName);
 
   return rowDataList?.map((row, rowIdx) => {
     const rowNumber = rowIdx + 3;
@@ -21,9 +24,9 @@ export const getRows = async (headerColumns: HeaderColumn[], sheetId: string = "
 };
 
 export const isReleaseTargetRow = (row: Row): boolean => {
-  const status = row.getCellFilteredByHeaderLabel("S");
-  const modifySpec = row.getCellFilteredByHeaderLabel("MODIFIED_S");
-  const modifyBody = row.getCellFilteredByHeaderLabel("MODIFIED_B");
+  const status: string | false = row.getCellFilteredByHeaderLabel("S")?.value ?? false;
+  const modifySpec: string | false = row.getCellFilteredByHeaderLabel("MODIFIED_S")?.value ?? false;
+  const modifyBody: string | false = row.getCellFilteredByHeaderLabel("MODIFIED_B")?.value ?? false;
 
-  return status?.value === "R" && (modifySpec || modifyBody) ? true : false;
+  return status === "R" && (modifySpec || modifyBody) ? true : false;
 };
