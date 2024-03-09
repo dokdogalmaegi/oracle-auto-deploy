@@ -1,9 +1,7 @@
 import { google } from "googleapis";
-
-import { ValueInputOption, InsertDataOption } from "../enums/GoogleEnums";
-
 import fs from "fs";
 import path from "path";
+import { ValueInputOption, InsertDataOption } from "../enums/GoogleSheetEnums";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
 
 const apiAuthPath = path.resolve(__dirname, "../../config/apiAuth.json");
