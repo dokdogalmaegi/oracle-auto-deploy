@@ -39,31 +39,6 @@ export class GoogleSheet {
     return await this.getValuesOf(cell, cell, sheetName);
   }
 
-  async #getValueOf(range: string): Promise<string[][] | undefined> {
-    const {
-      data: { values },
-    } = await this.#sheetApi.spreadsheets.values.get({
-      spreadsheetId: this.#spreadSheetId,
-      range,
-    });
-
-    return values;
-  }
-
-  async #getLastNumberByCell(cell: string = "A"): Promise<number> {
-    const START_NUMBER: Number = 1;
-    const range: string = `${cell}${START_NUMBER}:${cell}`;
-
-    const {
-      data: { values },
-    } = await this.#sheetApi.spreadsheets.values.get({
-      spreadsheetId: this.#spreadSheetId,
-      range,
-    });
-
-    return values.length;
-  }
-
   async insertValueToCell(location: string, value: any): Promise<void> {
     const range = `${location}:${location}`;
     const resource = {
@@ -80,15 +55,6 @@ export class GoogleSheet {
     };
 
     await this.#insertValueToCell(range, resource);
-  }
-
-  async #insertValueToCell(range: string, resource: any): Promise<void> {
-    await this.#sheetApi.spreadsheets.values.update({
-      spreadsheetId: this.#spreadSheetId,
-      valueInputOption: ValueInputOption.RAW,
-      range,
-      resource,
-    });
   }
 
   async appendValueToCell(cell: string, value: any): Promise<void> {
@@ -113,34 +79,6 @@ export class GoogleSheet {
     };
 
     await this.#appendValuesToCell(range, resource);
-  }
-
-  async #appendValuesToCell(range: string, resource: any): Promise<void> {
-    await this.#sheetApi.spreadsheets.values.append({
-      spreadsheetId: this.#spreadSheetId,
-      insertDataOption: InsertDataOption.INSERT_ROWS,
-      valueInputOption: ValueInputOption.RAW,
-      range,
-      resource,
-    });
-  }
-
-  #getColumnAlphabet(columnIdx: number): string {
-    const ALPHABET_A_ASCII = "A".charCodeAt(0);
-    const ALPHABET_Z_ASCII = "Z".charCodeAt(0);
-
-    const cellColumnIdAlphabetASCII = ALPHABET_A_ASCII + columnIdx;
-    let cellColumnIdAlphabet = "";
-    if (cellColumnIdAlphabetASCII > ALPHABET_Z_ASCII) {
-      cellColumnIdAlphabet = `A${String.fromCharCode(
-        ALPHABET_A_ASCII + (cellColumnIdAlphabetASCII - ALPHABET_Z_ASCII - 1)
-      )}`;
-    } else {
-      // eslint-disable-next-line no-unused-vars
-      cellColumnIdAlphabet = String.fromCharCode(cellColumnIdAlphabetASCII);
-    }
-
-    return cellColumnIdAlphabet;
   }
 
   async getHeaderColumnFromTwoRows(sheetName = "", start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
@@ -180,5 +118,67 @@ export class GoogleSheet {
     }
 
     return headerColumn;
+  }
+
+  async #getValueOf(range: string): Promise<string[][] | undefined> {
+    const {
+      data: { values },
+    } = await this.#sheetApi.spreadsheets.values.get({
+      spreadsheetId: this.#spreadSheetId,
+      range,
+    });
+
+    return values;
+  }
+
+  async #getLastNumberByCell(cell: string = "A"): Promise<number> {
+    const START_NUMBER: Number = 1;
+    const range: string = `${cell}${START_NUMBER}:${cell}`;
+
+    const {
+      data: { values },
+    } = await this.#sheetApi.spreadsheets.values.get({
+      spreadsheetId: this.#spreadSheetId,
+      range,
+    });
+
+    return values.length;
+  }
+
+  async #insertValueToCell(range: string, resource: any): Promise<void> {
+    await this.#sheetApi.spreadsheets.values.update({
+      spreadsheetId: this.#spreadSheetId,
+      valueInputOption: ValueInputOption.RAW,
+      range,
+      resource,
+    });
+  }
+
+  async #appendValuesToCell(range: string, resource: any): Promise<void> {
+    await this.#sheetApi.spreadsheets.values.append({
+      spreadsheetId: this.#spreadSheetId,
+      insertDataOption: InsertDataOption.INSERT_ROWS,
+      valueInputOption: ValueInputOption.RAW,
+      range,
+      resource,
+    });
+  }
+
+  #getColumnAlphabet(columnIdx: number): string {
+    const ALPHABET_A_ASCII = "A".charCodeAt(0);
+    const ALPHABET_Z_ASCII = "Z".charCodeAt(0);
+
+    const cellColumnIdAlphabetASCII = ALPHABET_A_ASCII + columnIdx;
+    let cellColumnIdAlphabet = "";
+    if (cellColumnIdAlphabetASCII > ALPHABET_Z_ASCII) {
+      cellColumnIdAlphabet = `A${String.fromCharCode(
+        ALPHABET_A_ASCII + (cellColumnIdAlphabetASCII - ALPHABET_Z_ASCII - 1)
+      )}`;
+    } else {
+      // eslint-disable-next-line no-unused-vars
+      cellColumnIdAlphabet = String.fromCharCode(cellColumnIdAlphabetASCII);
+    }
+
+    return cellColumnIdAlphabet;
   }
 }
