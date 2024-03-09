@@ -20,6 +20,6 @@ export class Row {
   }
 
   getCellFilteredByHeaderLabel(headerLabel: string): Cell | undefined {
-    return this.cells.find((cell) => cell.header.label.toLowerCase() === headerLabel.toLowerCase());
+    return this.cells.find((cell) => cell.header.label.toLowerCase().trim() === headerLabel.toLowerCase().trim());
   }
 }

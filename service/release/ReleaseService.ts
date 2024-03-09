@@ -13,10 +13,14 @@ export const getRowsWithHeaderColumn = async (
   const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
   const rowDataList = await googleSheet.getValuesOf(`${firstColumn}3`, lastColumn, sheetName);
 
-  return rowDataList?.map((row, rowIdx) => {
+  return rowDataList?.map((cellDataList, rowIdx) => {
     const rowNumber = rowIdx + 3;
-    // if ()
-    const cells = row.map((value, idx) => {
+
+    if (cellDataList.length > headerColumns.length) {
+      throw new Error(`Row ${rowNumber} has more cells than header columns`);
+    }
+
+    const cells = cellDataList.map((value, idx) => {
       return new Cell(headerColumns[idx], rowNumber, value);
     });
 
