@@ -3,6 +3,7 @@ import { Cell } from "../../model/googleSheet/Cell";
 import { Row } from "../../model/googleSheet/Row";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
 import { ReleaseTarget } from "../../model/releases/ReleaseTarget";
+import { exec } from "child_process";
 
 export const getRowsWithHeaderColumn = async (
   headerColumns: HeaderColumn[],
@@ -67,4 +68,21 @@ export const getReleaseTargetList = (rows: Row[]): ReleaseTarget[] => {
       packageItems.some((item) => item.isModifyBody)
     );
   });
+};
+
+const updatePackageSource = () => {
+  exec(
+    `cd ${process.env.PACKAGE_SOURCE_PATH} && git pull origin ${process.env.PACKAGE_BRANCH}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        throw error;
+      }
+
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
+      }
+
+      console.log(`stdout: ${stdout}`);
+    }
+  );
 };
