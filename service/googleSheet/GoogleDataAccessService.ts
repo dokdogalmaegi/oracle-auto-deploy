@@ -1,25 +1,21 @@
 import { google } from "googleapis";
-import fs from "fs";
-import path from "path";
+
 import { ValueInputOption, InsertDataOption } from "../enums/GoogleSheetEnums";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
-
-const apiAuthPath = path.resolve(__dirname, "../../config/apiAuth.json");
-const apiAuthJson = JSON.parse(fs.readFileSync(apiAuthPath, "utf8"));
-const { client_email: clientEmail, private_key: privateKey } = apiAuthJson;
-
-const SHEET_API_URL = "https://www.googleapis.com/auth/spreadsheets";
+import { GOOGLE_SHEET } from "../../constans/constants";
 
 export class GoogleSheet {
   #sheetApi: any;
   #spreadSheetId: string;
 
   constructor(spreadSheetId: string) {
-    if (!spreadSheetId) {
+    if (spreadSheetId.length === 0) {
       throw new Error("SpreadSheetId is required");
     }
 
-    const authorize = new google.auth.JWT(clientEmail, undefined, privateKey, [SHEET_API_URL]);
+    const authorize = new google.auth.JWT(GOOGLE_SHEET.CLIENT_EMAIL, undefined, GOOGLE_SHEET.PRIVATE_KEY, [
+      GOOGLE_SHEET.SHEET_API_URL,
+    ]);
 
     this.#sheetApi = google.sheets({
       version: "v4",
