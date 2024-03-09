@@ -8,12 +8,4 @@ export class ReleaseTarget {
     this.isModifySpec = isModifySpec;
     this.isModifyBody = isModifyBody;
   }
-
-  get json() {
-    return {
-      packageName: this.packageName,
-      isModifySpec: this.isModifySpec,
-      isModifyBody: this.isModifyBody,
-    };
-  }
 }
