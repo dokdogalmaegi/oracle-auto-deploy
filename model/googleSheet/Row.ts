@@ -22,4 +22,10 @@ export class Row {
   getCellFilteredByHeaderLabel(headerLabel: string): Cell | undefined {
     return this.cells.find((cell) => cell.header.label.toLowerCase().trim() === headerLabel.toLowerCase().trim());
   }
+
+  existsCellValueByHeaderLabel(headerLabel: string): boolean {
+    const headerLabelCell = this.getCellFilteredByHeaderLabel(headerLabel);
+
+    return headerLabelCell && headerLabelCell.value.length > 0 ? true : false;
+  }
 }

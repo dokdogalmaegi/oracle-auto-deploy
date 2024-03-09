@@ -29,15 +29,15 @@ export const getRowsWithHeaderColumn = async (
 };
 
 export const isReleaseTargetRow = (row: Row): boolean => {
-  const modifyTable: string | false = row.getCellFilteredByHeaderLabel("MODIFIED_T")?.value ?? false;
-  const modifyData: string | false = row.getCellFilteredByHeaderLabel("MODIFIED_D")?.value ?? false;
+  const modifyTable = row.existsCellValueByHeaderLabel("MODIFIED_T");
+  const modifyData = row.existsCellValueByHeaderLabel("MODIFIED_D");
   if (modifyTable || modifyData) {
     return false;
   }
 
   const status: string | false = row.getCellFilteredByHeaderLabel("S")?.value ?? false;
-  const modifySpec: string | false = row.getCellFilteredByHeaderLabel("MODIFIED_S")?.value ?? false;
-  const modifyBody: string | false = row.getCellFilteredByHeaderLabel("MODIFIED_B")?.value ?? false;
+  const modifySpec = row.existsCellValueByHeaderLabel("MODIFIED_S");
+  const modifyBody = row.existsCellValueByHeaderLabel("MODIFIED_B");
 
   return status === "R" && (modifySpec || modifyBody) ? true : false;
 };
