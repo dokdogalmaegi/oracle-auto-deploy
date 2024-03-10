@@ -1,3 +1,5 @@
+import logger from "../config/logger";
+
 const RESPONSE = {
   SUCCESS: "success",
   FAIL: "fail",
@@ -56,7 +58,7 @@ export class FailResponseData extends ResponseData {
   }
 
   get json() {
-    console.error(`Error: ${this.#error.stack}`);
+    logger.error(`Error: ${this.#error.stack}\nMessage: ${this.#error.message}`);
 
     return {
       ...super.json,

@@ -4,6 +4,7 @@ import { Row } from "../../model/googleSheet/Row";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
 import { ReleaseTarget } from "../../model/releases/ReleaseTarget";
 import { exec } from "child_process";
+import logger from "../../config/logger";
 
 export const getRowsWithHeaderColumn = async (
   headerColumns: HeaderColumn[],
@@ -79,10 +80,10 @@ const updatePackageSource = () => {
       }
 
       if (stderr) {
-        console.log(`stderr: ${stderr}`);
+        logger.info(`stderr: ${stderr}`);
       }
 
-      console.log(`stdout: ${stdout}`);
+      logger.info(`stdout: ${stdout}`);
     }
   );
 };

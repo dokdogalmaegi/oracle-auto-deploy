@@ -5,3 +5,4 @@ node_modules
 !oracle.js
 .env
 /config/*.json
+/logs
