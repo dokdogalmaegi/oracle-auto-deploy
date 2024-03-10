@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { GoogleSheet } from "../../../service/googleSheet/GoogleDataAccessService";
-import { getReleaseTargetList, getRowsWithHeaderColumn } from "../../../service/release/ReleaseService";
+import { getReleaseTargetList, getRowsWithHeaderColumn, releasePackage } from "../../../service/release/ReleaseService";
 import { SuccessResponseData } from "../../../utils/ResponseUtils";
 import { asyncRouter } from "../../../utils/RouterUtils";
 import logger from "../../../config/logger";
@@ -20,6 +20,22 @@ releasesV1Router.get(
 
     const response = new SuccessResponseData("Success to get release target data", releaseTargetList);
     return res.json(response.json);
+  })
+);
+
+releasesV1Router.post(
+  "/",
+  asyncRouter(async (req: Request, res: Response, next: NextFunction) => {
+    const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
+
+    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows();
+    const rows = await getRowsWithHeaderColumn(headerColumns);
+    const releaseTargetList = getReleaseTargetList(rows);
+
+    const { server } = req.body;
+    await releasePackage(releaseTargetList, server);
+
+    const response = new SuccessResponseData("Success to release package", releaseTargetList);
   })
 );
 
