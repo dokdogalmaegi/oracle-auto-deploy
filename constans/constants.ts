@@ -11,3 +11,11 @@ export const GOOGLE_SHEET = {
   PRIVATE_KEY: privateKey,
   NUMBER_MATCHER: RegExp(/(\d+)$/),
 };
+
+export const LOGGER = {
+  DIR_NAME: "logs",
+  ERROR_DIR_NAME: "error",
+  WARN_DIR_NAME: "warn",
+  DATE_PATTERN: "YYYY-MM-DD",
+  FILE_EXPIRATION_DAYS: "90",
+};
