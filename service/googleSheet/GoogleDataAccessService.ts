@@ -107,14 +107,10 @@ export class GoogleSheet {
           prefixLabel = firstRows[headerColumn.length - colSpan + 1];
         }
         headerColumn.push(
-          new HeaderColumn(
-            `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
-            colSpan + 1,
-            this.#getColumnAlphabet(idx)
-          )
+          new HeaderColumn(`${prefixLabel}_${secondRowValue}`, colSpan + 1, this.#getColumnAlphabet(idx))
         );
       } else {
-        headerColumn.push(new HeaderColumn(prefixLabel.replace("\n", ""), 1, this.#getColumnAlphabet(idx)));
+        headerColumn.push(new HeaderColumn(prefixLabel, 1, this.#getColumnAlphabet(idx)));
       }
     }
 

@@ -753,6 +753,13 @@
   dependencies:
     undici-types "~5.26.4"
 
+"@types/oracledb@^6.2.3":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/@types/oracledb/-/oracledb-6.2.3.tgz#dfdd5f6c99c6a2157a269ff1d09469b4fe796344"
+  integrity sha512-oeDX7HKJP/f5VHs9osgrJ/4u3zBsdDUcjDI+dpMnyyPqfC7RFCC73AKqwqXaiOFJ8OyWbMk+Vobjr9Sswb7axQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/qs@*":
   version "6.9.12"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.12.tgz#afa96b383a3a6fdc859453a1892d41b607fc7756"

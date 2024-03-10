@@ -15,6 +15,7 @@ export const getRowsWithHeaderColumn = async (
 
   const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
   const rowDataList = await googleSheet.getValuesOf(`${firstColumn}3`, lastColumn, sheetName);
+  console.log(JSON.stringify(headerColumns));
 
   if (!rowDataList) {
     return [];

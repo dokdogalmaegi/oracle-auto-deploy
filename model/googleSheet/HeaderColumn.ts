@@ -4,7 +4,7 @@ export class HeaderColumn {
   column: string;
 
   constructor(label: string, colSpan: number, column: string) {
-    this.label = label;
+    this.label = label.replace("\n", "").replace("-", "_");
     this.colSpan = colSpan;
     this.column = column;
   }
