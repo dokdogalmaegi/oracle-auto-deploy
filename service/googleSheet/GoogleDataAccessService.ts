@@ -3,6 +3,7 @@ import { google } from "googleapis";
 import { ValueInputOption, InsertDataOption } from "../enums/GoogleSheetEnums";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
 import { GOOGLE_SHEET } from "../../constans/constants";
+import logger from "../../config/logger";
 
 export class GoogleSheet {
   #sheetApi: any;
@@ -128,6 +129,7 @@ export class GoogleSheet {
       range,
     });
 
+    logger.info(`Get values of ${range}`);
     return values;
   }
 
@@ -146,6 +148,7 @@ export class GoogleSheet {
   }
 
   async #insertValueToCell(range: string, resource: any): Promise<void> {
+    logger.info(`Insert values to ${range}\n${JSON.stringify(resource)}`);
     await this.#sheetApi.spreadsheets.values.update({
       spreadsheetId: this.#spreadSheetId,
       valueInputOption: ValueInputOption.RAW,
@@ -155,6 +158,7 @@ export class GoogleSheet {
   }
 
   async #appendValuesToCell(range: string, resource: any): Promise<void> {
+    logger.info(`Append values to ${range}\n${JSON.stringify(resource)}`);
     await this.#sheetApi.spreadsheets.values.append({
       spreadsheetId: this.#spreadSheetId,
       insertDataOption: InsertDataOption.INSERT_ROWS,

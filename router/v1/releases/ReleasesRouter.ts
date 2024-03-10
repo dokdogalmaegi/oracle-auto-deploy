@@ -3,6 +3,7 @@ import { GoogleSheet } from "../../../service/googleSheet/GoogleDataAccessServic
 import { getReleaseTargetList, getRowsWithHeaderColumn } from "../../../service/release/ReleaseService";
 import { SuccessResponseData } from "../../../utils/ResponseUtils";
 import { asyncRouter } from "../../../utils/RouterUtils";
+import logger from "../../../config/logger";
 
 const releasesV1Router: Router = Router();
 
@@ -14,7 +15,10 @@ releasesV1Router.get(
     const headerColumns = await googleSheet.getHeaderColumnFromTwoRows();
     const rows = await getRowsWithHeaderColumn(headerColumns);
 
-    const response = new SuccessResponseData("Success to get release target data", getReleaseTargetList(rows));
+    const releaseTargetList = getReleaseTargetList(rows);
+    logger.info(`Success to get release target data.\ndata: ${JSON.stringify(releaseTargetList)}`);
+
+    const response = new SuccessResponseData("Success to get release target data", releaseTargetList);
     return res.json(response.json);
   })
 );
