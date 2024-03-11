@@ -47,11 +47,12 @@ const isReleaseTargetRow = (row: Row): boolean => {
     return false;
   }
 
-  const status: string | false = row.getCellFilteredByHeaderLabel("S")?.value ?? false;
+  const status: string = row.getCellFilteredByHeaderLabel("S")?.value ?? "";
+  const uiRelation = row.getCellFilteredByHeaderLabel("UI")?.value ?? "";
   const modifySpec = row.existsCellValueByHeaderLabel("MODIFIED_S");
   const modifyBody = row.existsCellValueByHeaderLabel("MODIFIED_B");
 
-  return status === "R" && (modifySpec || modifyBody) ? true : false;
+  return status === "R" && uiRelation === "N" && (modifySpec || modifyBody) ? true : false;
 };
 
 export const getReleaseTargetList = (rows: Row[]): ReleaseTarget[] => {
