@@ -27,13 +27,17 @@ const executeSqlList = async (
     errorSqlList.push(currentSql);
   }
 
-  if (errorSqlList.length > 0 && tryCount < tryMaxCount) {
-    logger.warn(`Retry executing SQL list on ${errorSqlList.length} SQLs on ${connection.oracleServerVersion} server.`);
-    logger.warn(`Retry count is ${tryCount + 1}, Remaining count is ${tryMaxCount - tryCount - 1}`);
-    await executeSqlList(errorSqlList, connection, tryCount + 1);
-  } else if (errorSqlList.length > 0 && tryCount >= tryMaxCount) {
-    logger.error(`Failed to execute query\n${errorSqlList.join("\n----------------\n")}`);
-    throw new Error(`Failed to execute SQL on ${connection.oracleServerVersion} after ${tryMaxCount} times, skip it`);
+  if (errorSqlList.length > 0) {
+    if (tryCount < tryMaxCount) {
+      logger.warn(
+        `Retry executing SQL list on ${errorSqlList.length} SQLs on ${connection.oracleServerVersion} server.`
+      );
+      logger.warn(`Retry count is ${tryCount + 1}, Remaining count is ${tryMaxCount - tryCount - 1}`);
+      await executeSqlList(errorSqlList, connection, tryCount + 1);
+    } else {
+      logger.error(`Failed to execute query\n${errorSqlList.join("\n----------------\n")}`);
+      throw new Error(`Failed to execute SQL on ${connection.oracleServerVersion} after ${tryMaxCount} times, skip it`);
+    }
   } else {
     logger.info(`Success to execute SQL list on ${connection.oracleServerVersion} server`);
     logger.info(`SQL count is ${sqlList.length}`);
