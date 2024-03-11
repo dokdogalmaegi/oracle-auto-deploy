@@ -8,6 +8,8 @@ import logger from "../../config/logger";
 import fs from "fs";
 import iconv from "iconv-lite";
 import { executeSqlListFrom } from "../oracle/OracleAccessService";
+import { promisify } from "util";
+const execPromise = promisify(exec);
 
 export const getRowsWithHeaderColumn = async (
   headerColumns: HeaderColumn[],
@@ -18,7 +20,6 @@ export const getRowsWithHeaderColumn = async (
 
   const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
   const rowDataList = await googleSheet.getValuesOf(`${firstColumn}3`, lastColumn, sheetName);
-  console.log(JSON.stringify(headerColumns));
 
   if (!rowDataList) {
     return [];
@@ -75,22 +76,8 @@ export const getReleaseTargetList = (rows: Row[]): ReleaseTarget[] => {
   });
 };
 
-const updatePackageSource = (fn: Function) => {
-  exec(
-    `cd ${process.env.PACKAGE_SOURCE_PATH} && git pull origin ${process.env.PACKAGE_BRANCH}`,
-    (error, stdout, stderr) => {
-      if (error) {
-        throw error;
-      }
-
-      if (stderr) {
-        logger.info(`stderr: ${stderr}`);
-      }
-
-      logger.info(`stdout: ${stdout}`);
-      fn();
-    }
-  );
+const updatePackageSource = async () => {
+  await execPromise(`cd ${process.env.REPOSITORY_PATH} && git pull origin ${process.env.PACKAGE_BRANCH}`);
 };
 
 const getPackage = (packageName: string): { specSql: string; bodySql: string } => {
@@ -111,35 +98,42 @@ const getPackage = (packageName: string): { specSql: string; bodySql: string } =
 
 export const releasePackage = async (releaseTargetList: ReleaseTarget[], server: string) => {
   logger.info(`Start to release package on ${server} server`);
-  updatePackageSource(() => {
-    const specSqlList: string[] = [];
-    const bodySqlList: string[] = [];
-    releaseTargetList.forEach((release) => {
-      const { specSql, bodySql } = getPackage(release.packageName);
 
-      if (release.isModifySpec) {
-        specSqlList.push(specSql);
-      }
+  logger.info(`Start to update package source`);
+  await updatePackageSource();
+  logger.info(`Success to update package source`);
 
-      if (release.isModifyBody) {
-        bodySqlList.push(bodySql);
-      }
+  const specSqlList: string[] = [];
+  const bodySqlList: string[] = [];
+  releaseTargetList.forEach((release) => {
+    const { specSql, bodySql } = getPackage(release.packageName);
 
-      if (!release.isModifySpec && !release.isModifyBody) {
-        throw new Error(`No modified SQL for ${release.packageName}`);
-      }
-
-      logger.info(`Success to get ${release.packageName} SQL`);
-    });
-
-    if (specSqlList.length > 0) {
-      executeSqlListFrom(server, specSqlList);
+    if (release.isModifySpec) {
+      logger.info(`Get ${release.packageName} spec SQL`);
+      specSqlList.push(specSql);
     }
 
-    if (bodySqlList.length > 0) {
-      executeSqlListFrom(server, bodySqlList);
+    if (release.isModifyBody) {
+      logger.info(`Get ${release.packageName} body SQL`);
+      bodySqlList.push(bodySql);
     }
 
-    logger.info(`Success to release package on ${server} server`);
+    if ((!release.isModifySpec && !release.isModifyBody) || (specSql.length === 0 && bodySql.length === 0)) {
+      throw new Error(`No modified SQL for ${release.packageName}`);
+    }
+
+    logger.info(`Success to get ${release.packageName} SQL`);
   });
+
+  if (specSqlList.length > 0) {
+    logger.info(`Start to release spec package on ${server} server`);
+    await executeSqlListFrom(server, specSqlList);
+  }
+
+  if (bodySqlList.length > 0) {
+    logger.info(`Start to release body package on ${server} server`);
+    await executeSqlListFrom(server, bodySqlList);
+  }
+
+  logger.info(`Success to release package on ${server} server`);
 };

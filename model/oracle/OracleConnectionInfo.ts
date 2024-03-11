@@ -17,7 +17,7 @@ class OracleConnectionInfo {
 export class ServerConnection {
   server: string;
   #connectionInfo: OracleConnectionInfo;
-  #REQUIRED_VARIABLES: string[] = ["USER", "PASSWORD", "HOST", "PORT", "SERVICE_NAME"];
+  #REQUIRED_VARIABLES: string[] = ["USER", "PASSWORD", "DB_HOST", "PORT", "SERVICE_NAME"];
 
   #validateEnvironment = (): boolean => {
     this.#REQUIRED_VARIABLES.forEach((variable) => {
