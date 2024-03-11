@@ -82,7 +82,11 @@ export class GoogleSheet {
     await this.#appendValuesToCell(range, resource);
   }
 
-  async getHeaderColumnFromTwoRows(sheetName = "", start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
+  async getHeaderColumnFromTwoRows(
+    sheetName: string | undefined = "",
+    start: string = "A1",
+    end: string = "AZ2"
+  ): Promise<HeaderColumn[]> {
     let range = `${start}:${end}`;
     if (sheetName.length > 0) {
       range = `${sheetName}!${range}`;

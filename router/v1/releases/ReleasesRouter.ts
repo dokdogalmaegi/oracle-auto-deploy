@@ -9,11 +9,13 @@ const releasesV1Router: Router = Router();
 
 releasesV1Router.get(
   "/",
-  asyncRouter(async (_: Request, res: Response, next: NextFunction) => {
+  asyncRouter(async (req: Request, res: Response, next: NextFunction) => {
+    const { sheetName } = req.query;
+
     const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
 
-    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows();
-    const rows = await getRowsWithHeaderColumn(headerColumns);
+    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows(sheetName as string | undefined);
+    const rows = await getRowsWithHeaderColumn(headerColumns, sheetName as string | undefined);
 
     const releaseTargetList = getReleaseTargetList(rows);
     logger.info(`Success to get release target data.\ndata: ${JSON.stringify(releaseTargetList)}`);
@@ -26,15 +28,15 @@ releasesV1Router.get(
 releasesV1Router.post(
   "/",
   asyncRouter(async (req: Request, res: Response, next: NextFunction) => {
-    const { server } = req.body;
+    const { server, sheetName } = req.body;
     if (!server || server.length === 0) {
       throw new Error("Server name is required");
     }
 
     const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
 
-    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows();
-    const rows = await getRowsWithHeaderColumn(headerColumns);
+    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows(sheetName);
+    const rows = await getRowsWithHeaderColumn(headerColumns, sheetName);
     const releaseTargetList = getReleaseTargetList(rows);
 
     await releasePackage(releaseTargetList, server);
