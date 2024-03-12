@@ -8,3 +8,4 @@ node_modules
 /config/*.json
 /logs
 .DS_Store
+/apiModels

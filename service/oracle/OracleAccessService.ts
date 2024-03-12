@@ -2,12 +2,20 @@ import OracleDB from "oracledb";
 import { ServerConnection } from "../../model/oracle/OracleConnectionInfo";
 import logger from "../../config/logger";
 import { ReleaseTarget, ReleaseTargetQuery } from "../../model/releases/ReleaseTarget";
+import { ORACLE } from "../../constants/constants";
 
-const getConnection = async (server: string) => {
+const getConnection = async (server: string): Promise<OracleDB.Connection> => {
   const serverConnection = new ServerConnection(server);
 
   logger.info(`Try to connect to ${server} server`);
-  return await OracleDB.getConnection(serverConnection.connectionInfo);
+  return await Promise.race<OracleDB.Connection>([
+    OracleDB.getConnection(serverConnection.connectionInfo),
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(new Error(`Failed to connect to ${server} server after ${ORACLE.CONNECTION_TIMEOUT_SECONDS} seconds`));
+      }, ORACLE.CONNECTION_TIMEOUT_SECONDS * 1000);
+    }),
+  ]);
 };
 
 const executeSqlList = async (

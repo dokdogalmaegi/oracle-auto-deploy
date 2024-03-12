@@ -3,6 +3,8 @@ import ApiV1Router from "./router/MainRouter";
 import dotenv from "dotenv";
 import path from "path";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import * as swaggerDocument from "./swagger/swagger.json";
 import { errorHandler } from "./middleware/ErrorHandler";
 import logger, { morganStream } from "./config/logger";
 
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan(":method :status :url :response-time ms", { stream: morganStream }));
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/v1", ApiV1Router);
 app.use(errorHandler);
 

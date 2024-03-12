@@ -19,3 +19,7 @@ export const LOGGER = {
   DATE_PATTERN: "YYYY-MM-DD",
   FILE_EXPIRATION_DAYS: "90",
 };
+
+export const ORACLE = {
+  CONNECTION_TIMEOUT_SECONDS: 10,
+};
