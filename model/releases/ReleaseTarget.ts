@@ -9,3 +9,8 @@ export class ReleaseTarget {
     this.isModifyBody = isModifyBody;
   }
 }
+
+export interface ReleaseTargetQuery {
+  releaseTarget: ReleaseTarget;
+  query: string;
+}

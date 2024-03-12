@@ -2,12 +2,12 @@ import { GoogleSheet } from "../googleSheet/GoogleDataAccessService";
 import { Cell } from "../../model/googleSheet/Cell";
 import { Row } from "../../model/googleSheet/Row";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
-import { ReleaseTarget } from "../../model/releases/ReleaseTarget";
+import { ReleaseTarget, ReleaseTargetQuery } from "../../model/releases/ReleaseTarget";
 import { exec } from "child_process";
 import logger from "../../config/logger";
 import fs from "fs";
 import iconv from "iconv-lite";
-import { executeSqlListFrom } from "../oracle/OracleAccessService";
+import { executeReleaseTargetQueryListFrom } from "../oracle/OracleAccessService";
 import { promisify } from "util";
 const execPromise = promisify(exec);
 
@@ -104,19 +104,19 @@ export const releasePackage = async (releaseTargetList: ReleaseTarget[], server:
   await updatePackageSource();
   logger.info(`Success to update package source`);
 
-  const specSqlList: string[] = [];
-  const bodySqlList: string[] = [];
+  const specSqlList: ReleaseTargetQuery[] = [];
+  const bodySqlList: ReleaseTargetQuery[] = [];
   releaseTargetList.forEach((release) => {
     const { specSql, bodySql } = getPackage(release.packageName);
 
     if (release.isModifySpec) {
       logger.info(`Get ${release.packageName} spec SQL`);
-      specSqlList.push(specSql);
+      specSqlList.push({ releaseTarget: release, query: specSql });
     }
 
     if (release.isModifyBody) {
       logger.info(`Get ${release.packageName} body SQL`);
-      bodySqlList.push(bodySql);
+      bodySqlList.push({ releaseTarget: release, query: bodySql });
     }
 
     if ((!release.isModifySpec && !release.isModifyBody) || (specSql.length === 0 && bodySql.length === 0)) {
@@ -128,12 +128,12 @@ export const releasePackage = async (releaseTargetList: ReleaseTarget[], server:
 
   if (specSqlList.length > 0) {
     logger.info(`Start to release spec package on ${server} server`);
-    await executeSqlListFrom(server, specSqlList);
+    await executeReleaseTargetQueryListFrom(server, specSqlList);
   }
 
   if (bodySqlList.length > 0) {
     logger.info(`Start to release body package on ${server} server`);
-    await executeSqlListFrom(server, bodySqlList);
+    await executeReleaseTargetQueryListFrom(server, bodySqlList);
   }
 
   logger.info(`Success to release package on ${server} server`);
