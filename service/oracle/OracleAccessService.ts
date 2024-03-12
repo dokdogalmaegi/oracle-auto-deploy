@@ -46,7 +46,9 @@ const executeSqlList = async (
 };
 
 const getInvalidRelaseTarget = async (releaseTargetQueries: ReleaseTargetQuery[], connection: OracleDB.Connection) => {
-  const invalidReleaseTargetList: ReleaseTargetQuery[] = [];
+  const invalidReleaseTargetList: ReleaseTargetQuery[] = releaseTargetQueries;
+  const invalidSpecList: ReleaseTargetQuery[] = [];
+  const invalidBodyList: ReleaseTargetQuery[] = [];
 
   const checkInvalidPackageNameList = releaseTargetQueries
     .map((releaseTargetQuery) => "'" + releaseTargetQuery.releaseTarget.packageName + "'")
@@ -63,33 +65,54 @@ const getInvalidRelaseTarget = async (releaseTargetQueries: ReleaseTargetQuery[]
       (releaseTargetQuery) => releaseTargetQuery.releaseTarget.isModifyBody
     );
 
-    const specInvalidList: ReleaseTargetQuery[] = result.rows
-      // @ts-ignore
-      .filter((row: any[]) => row[1] === "PACKAGE")
-      // @ts-ignore
-      .map((row: any[]) =>
-        specList.find((releaseTargetQuery) => releaseTargetQuery.releaseTarget.packageName === row[0])
-      )
-      .filter(
-        (releaseTargetQuery: ReleaseTargetQuery | undefined): releaseTargetQuery is ReleaseTargetQuery =>
-          !!releaseTargetQuery
-      );
-    const bodyInvalidList: ReleaseTargetQuery[] = result.rows
-      // @ts-ignore
-      .filter((row: any[]) => row[1] === "PACKAGE BODY")
-      // @ts-ignore
-      .map((row: any[]) =>
-        bodyList.find((releaseTargetQuery) => releaseTargetQuery.releaseTarget.packageName === row[0])
-      )
-      .filter(
-        (releaseTargetQuery: ReleaseTargetQuery | undefined): releaseTargetQuery is ReleaseTargetQuery =>
-          !!releaseTargetQuery
-      );
-
-    invalidReleaseTargetList.push(...specInvalidList, ...bodyInvalidList);
+    invalidSpecList.push(
+      ...result.rows
+        // @ts-ignore
+        .filter((row: any[]) => row[1] === "PACKAGE")
+        // @ts-ignore
+        .map((row: any[]) =>
+          specList.find((releaseTargetQuery) => releaseTargetQuery.releaseTarget.packageName === row[0])
+        )
+        .filter(
+          (releaseTargetQuery: ReleaseTargetQuery | undefined): releaseTargetQuery is ReleaseTargetQuery =>
+            !!releaseTargetQuery
+        )
+    );
+    invalidBodyList.push(
+      ...result.rows
+        // @ts-ignore
+        .filter((row: any[]) => row[1] === "PACKAGE BODY")
+        // @ts-ignore
+        .map((row: any[]) =>
+          bodyList.find((releaseTargetQuery) => releaseTargetQuery.releaseTarget.packageName === row[0])
+        )
+        .filter(
+          (releaseTargetQuery: ReleaseTargetQuery | undefined): releaseTargetQuery is ReleaseTargetQuery =>
+            !!releaseTargetQuery
+        )
+    );
   }
 
-  return invalidReleaseTargetList;
+  return invalidReleaseTargetList
+    .map((invalidReleaseTarget: ReleaseTargetQuery) => {
+      const isModifySpec = invalidSpecList.some(
+        (invalidSpec) => invalidSpec.releaseTarget.packageName === invalidReleaseTarget.releaseTarget.packageName
+      );
+      const isModifyBody = invalidBodyList.some(
+        (invalidBody) => invalidBody.releaseTarget.packageName === invalidReleaseTarget.releaseTarget.packageName
+      );
+
+      const releaseTarget = new ReleaseTarget(
+        invalidReleaseTarget.releaseTarget.packageName,
+        isModifySpec,
+        isModifyBody
+      );
+      return { releaseTarget, query: invalidReleaseTarget.query };
+    })
+    .filter(
+      (invalidReleaseTarget) =>
+        invalidReleaseTarget.releaseTarget.isModifySpec || invalidReleaseTarget.releaseTarget.isModifyBody
+    );
 };
 
 export const executeReleaseTargetQueryListFrom = async (
