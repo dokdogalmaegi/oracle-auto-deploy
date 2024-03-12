@@ -41,4 +41,16 @@ describe("Row", () => {
     const row = new Row([cell], 1);
     expect(row.getCellFilteredByHeaderLabel("label")).toBe(cell);
   });
+
+  it("should return true if the cell value exists by header label", () => {
+    const cell = new Cell(header, 1, "value");
+    const row = new Row([cell], 1);
+    expect(row.existsCellValueByHeaderLabel("label")).toBe(true);
+  });
+
+  it("should return false if the cell value does not exist by header label", () => {
+    const cell = new Cell(header, 1, "");
+    const row = new Row([cell], 1);
+    expect(row.existsCellValueByHeaderLabel("label")).toBe(false);
+  });
 });

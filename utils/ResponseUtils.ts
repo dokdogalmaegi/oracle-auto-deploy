@@ -1,3 +1,5 @@
+import logger from "../config/logger";
+
 const RESPONSE = {
   SUCCESS: "success",
   FAIL: "fail",
@@ -8,9 +10,7 @@ class ResponseData {
   #message: string;
 
   constructor(status: string, message: string) {
-    const isValidStatus = Object.entries(RESPONSE).filter(
-      ([key, value]) => value === status
-    );
+    const isValidStatus = Object.entries(RESPONSE).filter(([key, value]) => value === status);
     if (isValidStatus.length === 0) {
       throw new Error("Must be status is success or fail");
     }
@@ -34,9 +34,7 @@ export class SuccessResponseData extends ResponseData {
     super(RESPONSE.SUCCESS, message);
 
     if (data instanceof Error) {
-      throw new Error(
-        "Data cannot be an instance of Error class, use FailResponseData instead"
-      );
+      throw new Error("Data cannot be an instance of Error class, use FailResponseData instead");
     }
 
     this.#data = data;
@@ -60,10 +58,11 @@ export class FailResponseData extends ResponseData {
   }
 
   get json() {
+    logger.error(`Error: ${this.#error.stack}\nMessage: ${this.#error.message}`);
+
     return {
       ...super.json,
-      message: this.#error.message,
-      error: this.#error,
+      data: null,
     };
   }
 }

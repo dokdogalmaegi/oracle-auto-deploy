@@ -4,4 +4,7 @@ node_modules
 *.js
 !oracle.js
 .env
+.env.*
 /config/*.json
+/logs
+.DS_Store

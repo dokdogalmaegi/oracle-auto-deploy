@@ -1,23 +1,22 @@
 import { google } from "googleapis";
 
-import { ValueInputOption, InsertDataOption } from "../enums/GoogleEnums";
-
-import fs from "fs";
-import path from "path";
+import { ValueInputOption, InsertDataOption } from "../enums/GoogleSheetEnums";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
-
-const apiAuthPath = path.resolve(__dirname, "../../config/apiAuth.json");
-const apiAuthJson = JSON.parse(fs.readFileSync(apiAuthPath, "utf8"));
-const { client_email: clientEmail, private_key: privateKey } = apiAuthJson;
-
-const SHEET_API_URL = "https://www.googleapis.com/auth/spreadsheets";
+import { GOOGLE_SHEET } from "../../constans/constants";
+import logger from "../../config/logger";
 
 export class GoogleSheet {
   #sheetApi: any;
   #spreadSheetId: string;
 
   constructor(spreadSheetId: string) {
-    const authorize = new google.auth.JWT(clientEmail, undefined, privateKey, [SHEET_API_URL]);
+    if (spreadSheetId.length === 0) {
+      throw new Error("SpreadSheetId is required");
+    }
+
+    const authorize = new google.auth.JWT(GOOGLE_SHEET.CLIENT_EMAIL, undefined, GOOGLE_SHEET.PRIVATE_KEY, [
+      GOOGLE_SHEET.SHEET_API_URL,
+    ]);
 
     this.#sheetApi = google.sheets({
       version: "v4",
@@ -27,43 +26,18 @@ export class GoogleSheet {
     this.#spreadSheetId = spreadSheetId;
   }
 
-  async getValuesOf(startCell: string, endCell: string, sheetId: string = ""): Promise<string[][] | undefined> {
+  async getValuesOf(startCell: string, endCell: string, sheetName: string = ""): Promise<string[][] | undefined> {
     let range = `${startCell}:${endCell}`;
 
-    if (sheetId.length > 0) {
-      range = `${sheetId}!${range}`;
+    if (sheetName.length > 0) {
+      range = `${sheetName}!${range}`;
     }
 
     return await this.#getValueOf(range);
   }
 
-  async getOneCellValuesOf(cell: string, sheetId: string = ""): Promise<string[][] | undefined> {
-    return await this.getValuesOf(cell, cell, sheetId);
-  }
-
-  async #getValueOf(range: string): Promise<string[][] | undefined> {
-    const {
-      data: { values },
-    } = await this.#sheetApi.spreadsheets.values.get({
-      spreadsheetId: this.#spreadSheetId,
-      range,
-    });
-
-    return values;
-  }
-
-  async #getLastNumberByCell(cell: string = "A"): Promise<number> {
-    const START_NUMBER: Number = 1;
-    const range: string = `${cell}${START_NUMBER}:${cell}`;
-
-    const {
-      data: { values },
-    } = await this.#sheetApi.spreadsheets.values.get({
-      spreadsheetId: this.#spreadSheetId,
-      range,
-    });
-
-    return values.length;
+  async getOneCellValuesOf(cell: string, sheetName: string = ""): Promise<string[][] | undefined> {
+    return await this.getValuesOf(cell, cell, sheetName);
   }
 
   async insertValueToCell(location: string, value: any): Promise<void> {
@@ -82,15 +56,6 @@ export class GoogleSheet {
     };
 
     await this.#insertValueToCell(range, resource);
-  }
-
-  async #insertValueToCell(range: string, resource: any): Promise<void> {
-    await this.#sheetApi.spreadsheets.values.update({
-      spreadsheetId: this.#spreadSheetId,
-      valueInputOption: ValueInputOption.RAW,
-      range,
-      resource,
-    });
   }
 
   async appendValueToCell(cell: string, value: any): Promise<void> {
@@ -117,7 +82,83 @@ export class GoogleSheet {
     await this.#appendValuesToCell(range, resource);
   }
 
+  async getHeaderColumnFromTwoRows(
+    sheetName: string | undefined = "",
+    start: string = "A1",
+    end: string = "AZ2"
+  ): Promise<HeaderColumn[]> {
+    let range = `${start}:${end}`;
+    if (sheetName.length > 0) {
+      range = `${sheetName}!${range}`;
+    }
+
+    const result = await this.#getValueOf(range);
+    if (result === undefined) {
+      return [];
+    }
+    const firstRows = result[0];
+    const secondRows = result[1];
+
+    const headerColumn: HeaderColumn[] = [];
+    for (let idx = 0; idx < firstRows.length; idx++) {
+      const secondRowValue = secondRows[idx];
+
+      let prefixLabel = firstRows[idx];
+      let colSpan = 1;
+      if (secondRowValue !== undefined && secondRowValue.length > 0) {
+        if (prefixLabel.length === 0) {
+          colSpan = headerColumn[headerColumn.length - 1].colSpan;
+          prefixLabel = firstRows[headerColumn.length - colSpan + 1];
+        }
+        headerColumn.push(
+          new HeaderColumn(`${prefixLabel}_${secondRowValue}`, colSpan + 1, this.#getColumnAlphabet(idx))
+        );
+      } else {
+        headerColumn.push(new HeaderColumn(prefixLabel, 1, this.#getColumnAlphabet(idx)));
+      }
+    }
+
+    return headerColumn;
+  }
+
+  async #getValueOf(range: string): Promise<string[][] | undefined> {
+    const {
+      data: { values },
+    } = await this.#sheetApi.spreadsheets.values.get({
+      spreadsheetId: this.#spreadSheetId,
+      range,
+    });
+
+    logger.info(`Get values of ${range}`);
+    return values;
+  }
+
+  async #getLastNumberByCell(cell: string = "A"): Promise<number> {
+    const START_NUMBER: Number = 1;
+    const range: string = `${cell}${START_NUMBER}:${cell}`;
+
+    const {
+      data: { values },
+    } = await this.#sheetApi.spreadsheets.values.get({
+      spreadsheetId: this.#spreadSheetId,
+      range,
+    });
+
+    return values.length;
+  }
+
+  async #insertValueToCell(range: string, resource: any): Promise<void> {
+    logger.info(`Insert values to ${range}\n${JSON.stringify(resource)}`);
+    await this.#sheetApi.spreadsheets.values.update({
+      spreadsheetId: this.#spreadSheetId,
+      valueInputOption: ValueInputOption.RAW,
+      range,
+      resource,
+    });
+  }
+
   async #appendValuesToCell(range: string, resource: any): Promise<void> {
+    logger.info(`Append values to ${range}\n${JSON.stringify(resource)}`);
     await this.#sheetApi.spreadsheets.values.append({
       spreadsheetId: this.#spreadSheetId,
       insertDataOption: InsertDataOption.INSERT_ROWS,
@@ -143,49 +184,5 @@ export class GoogleSheet {
     }
 
     return cellColumnIdAlphabet;
-  }
-
-  async getHeaderColumnFromTwoRows(sheetId = "", start = "A1", end = "AZ2"): Promise<HeaderColumn[]> {
-    let range = `${start}:${end}`;
-    if (sheetId.length > 0) {
-      range = `${sheetId}!${range}`;
-    }
-
-    const result = await this.#getValueOf(range);
-    if (result === undefined) {
-      return [];
-    }
-    const firstRows = result[0];
-    const secondRows = result[1];
-
-    const headerColumn: HeaderColumn[] = [];
-    // const headerColumn: {
-    //   label: string;
-    //   colSpan: number;
-    //   column: string;
-    // }[] = [];
-    for (let idx = 0; idx < firstRows.length; idx++) {
-      const secondRowValue = secondRows[idx];
-
-      let prefixLabel = firstRows[idx];
-      let colSpan = 1;
-      if (secondRowValue !== undefined && secondRowValue.length > 0) {
-        if (prefixLabel.length === 0) {
-          colSpan = headerColumn[headerColumn.length - 1].colSpan;
-          prefixLabel = firstRows[headerColumn.length - colSpan + 1];
-        }
-        headerColumn.push(
-          new HeaderColumn(
-            `${prefixLabel.replace("\n", "")}_${secondRowValue}`,
-            colSpan + 1,
-            this.#getColumnAlphabet(idx)
-          )
-        );
-      } else {
-        headerColumn.push(new HeaderColumn(prefixLabel.replace("\n", ""), 1, this.#getColumnAlphabet(idx)));
-      }
-    }
-
-    return headerColumn;
   }
 }
