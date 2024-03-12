@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q app.js\"",
     "test": "jest",
-    "swagger": "swagger-typescript-api -p ./swagger/swagger.json -r -o ./models --modular -d --extract-request-body --extract-response-body --extract-response-error --axios"
+    "swagger": "swagger-typescript-api -p ./swagger/swagger.json -r -o ./apiModels --modular -d --extract-request-body --extract-response-body --extract-response-error --axios"
   },
   "dependencies": {
     "@types/morgan": "^1.9.9",
