@@ -1,0 +1,106 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto Package Deployer",
+    "version": "1.0.0",
+    "description": "This is the API documentation for the Auto Package Deployer",
+    "contact": {
+      "name": "Dokdogalmaegi",
+      "url": "https://github.com/dokdogalmaegi",
+      "email": "dokdogalmaegi@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/api/v1/alive": {
+      "get": {
+        "summary": "Check if the server is alive",
+        "tags": ["Health"],
+        "description": "This endpoint is used to check if the server is alive",
+        "responses": {
+          "200": {
+            "description": "The server is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "I'm alive"
+                    },
+                    "data": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/releases": {
+      "get": {
+        "summary": "Get release target list",
+        "tags": ["Release"],
+        "description": "This endpoint is used to get release target list. \n The conditions for a release target are as follows: Status is \"Ready\" (S: R) and Not related to the UI (UI: N) and Table or Data deployment not required (Modified: T or D X) and Requiring deployment of Spec or Body (Modified: S or B)",
+        "responses": {
+          "200": {
+            "description": "Success to get release target data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success to get release target data"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "packageName": {
+                            "type": "string",
+                            "example": "MOX_VERIFY_RESULT"
+                          },
+                          "isModifySpec": {
+                            "type": "boolean",
+                            "example": false
+                          },
+                          "isModifyBody": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
