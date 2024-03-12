@@ -2,7 +2,7 @@ import { GoogleSheet } from "../googleSheet/GoogleDataAccessService";
 import { Cell } from "../../model/googleSheet/Cell";
 import { Row } from "../../model/googleSheet/Row";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
-import { QueryType, ReleaseTarget, ReleaseTargetQuery } from "../../model/releases/ReleaseTarget";
+import { ReleaseTarget, ReleaseTargetQuery } from "../../model/releases/ReleaseTarget";
 import { exec } from "child_process";
 import logger from "../../config/logger";
 import fs from "fs";
