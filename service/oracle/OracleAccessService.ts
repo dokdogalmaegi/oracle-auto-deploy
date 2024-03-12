@@ -21,7 +21,7 @@ const executeSqlList = async (
   try {
     for (const sql of sqlList) {
       currentSql = sql;
-      // await connection.execute(sql);
+      await connection.execute(sql);
     }
   } catch (error) {
     logger.error(`Error: ${error}`);
