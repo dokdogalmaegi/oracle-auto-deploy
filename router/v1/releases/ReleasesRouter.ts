@@ -28,15 +28,16 @@ releasesV1Router.get(
 releasesV1Router.post(
   "/",
   asyncRouter(async (req: Request, res: Response, next: NextFunction) => {
-    const { server, sheetName } = req.body;
+    const { server } = req.body;
+    const { sheetName } = req.query;
     if (!server || server.length === 0) {
       throw new Error("Server name is required");
     }
 
     const googleSheet = new GoogleSheet(process.env.SHEET_ID!);
 
-    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows(sheetName);
-    const rows = await getRowsWithHeaderColumn(headerColumns, sheetName);
+    const headerColumns = await googleSheet.getHeaderColumnFromTwoRows(sheetName as string | undefined);
+    const rows = await getRowsWithHeaderColumn(headerColumns, sheetName as string | undefined);
     const releaseTargetList = getReleaseTargetList(rows);
 
     await releasePackage(releaseTargetList, server);
