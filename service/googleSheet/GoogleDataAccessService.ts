@@ -2,7 +2,7 @@ import { google } from "googleapis";
 
 import { ValueInputOption, InsertDataOption } from "../enums/GoogleSheetEnums";
 import { HeaderColumn } from "../../model/googleSheet/HeaderColumn";
-import { GOOGLE_SHEET } from "../../constans/constants";
+import { GOOGLE_SHEET } from "../../constants/constants";
 import logger from "../../config/logger";
 
 export class GoogleSheet {

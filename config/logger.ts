@@ -1,6 +1,6 @@
 import winston, { Logger, format } from "winston";
 import winstonDaily from "winston-daily-rotate-file";
-import { LOGGER } from "../constans/constants";
+import { LOGGER } from "../constants/constants";
 
 const { combine, timestamp, printf, colorize } = format;
 
