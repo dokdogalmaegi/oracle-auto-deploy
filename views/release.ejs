@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto Package Deployer (APD)</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      integrity="sha384-4LISF5TTJX/fLmGSxO53rV4miRxdg84mZsxmO8Rx5jGtp/LbrixFETvWa5a6sESd"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/fontawesome.min.css"
+      integrity="sha384-BY+fdrpOd3gfeRvTSMT+VUZmA728cfF9Z2G42xpaRkUGu2i3DyzpTURDo5A6CaLK"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="display-1" onclick="toggleTheme()" style="cursor: pointer;" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Change theme" data-bs-placement="bottom">Auto Package Deployer (APD)</h1>
+      <div class="row justify-content-between">
+        <div class="col-md-6 text-center">
+          <input type="text" class="form-control mb-3" id="resourceSheetName" placeholder="Please enter the base sheetname of the resource.">
+        </div>
+        <div class="col-md-6 text-center">
+          <input type="text" class="form-control mb-3" id="deployServer" onkeydown="if(event.keyCode==13) releasePackage()" placeholder="Please enter the server to deploy to.">
+        </div>
+      </div>    
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <button onclick="getReleaseTargetList()" class="btn btn-warning mb-3" data-bs-toggle="tooltip" data-bs-title="Loading release targets.">Get release target list</button>
+        </div>
+        <div class="col-md-6">
+          <button onclick="releasePackage()" class="btn btn-danger mb-3" data-bs-toggle="tooltip" data-bs-title="Deploying packages, Note: Deployment proceeds separately from the following list.">Deploy all target package</button>
+        </div>
+      </div>  
+      <div class="row" style="margin-top: 50px;">
+        <div class="col-md-6">
+          <h6 class="display-6">Spec</h6>
+            <ul class="list-group">
+            </ul>
+        </div>
+        <div class="col-md-6">
+          <h6 class="display-6">Body</h6>
+            <ul class="list-group">
+            </ul>
+        </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+      const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+      })
+
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+      function toggleTheme() {
+          const htmlElement = document.querySelector('html');
+          const currentTheme = htmlElement.getAttribute('data-bs-theme');
+          if (currentTheme === 'dark') {
+              htmlElement.setAttribute('data-bs-theme', 'light');
+          } else {
+              htmlElement.setAttribute('data-bs-theme', 'dark');
+          }
+      }
+
+      function disableAllButtons() {
+          const buttons = document.querySelectorAll('button');
+          buttons.forEach(button => button.setAttribute('disabled', 'disabled'));
+      }
+
+      function enableAllButtons() {
+          const buttons = document.querySelectorAll('button');
+          buttons.forEach(button => button.removeAttribute('disabled'));
+      }
+
+      function disableAllInputs() {
+          const inputs = document.querySelectorAll('input');
+          inputs.forEach(input => input.setAttribute('disabled', 'disabled'));
+      }
+
+      function enableAllInputs() {
+          const inputs = document.querySelectorAll('input');
+          inputs.forEach(input => input.removeAttribute('disabled'));
+      }
+
+      function enableAllUserActions() {
+          enableAllButtons();
+          enableAllInputs();
+      }
+
+      function disableAllUserActions() {
+          disableAllButtons();
+          disableAllInputs();
+      }
+
+      function getReleaseTargetList() {
+          disableAllUserActions();
+          
+          const requestUrl = new URL('/api/v1/releases', window.location.origin);
+          const resourceSheetName = document.getElementById('resourceSheetName').value;
+          if (resourceSheetName) {
+            requestUrl.searchParams.append('sheetName', resourceSheetName);
+          }
+          fetch(requestUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } } )
+              .then(response => response.json())
+              .then(data => {
+                  if (data.status === "fail") {
+                    alert(data.message);
+                    return;
+                  }
+                  const specItemList = [];
+                  const bodyItemList = [];
+                  data.data.forEach(releaseTarget => {
+                      // Add items to the list
+                      if (releaseTarget.isModifySpec) {
+                        const specItem = document.createElement('li');
+                        specItem.classList.add('list-group-item');
+                        specItem.textContent = releaseTarget.packageName;
+                        specItemList.push(specItem);
+                      }
+
+                      if (releaseTarget.isModifyBody) {
+                        const bodyItem = document.createElement('li');
+                        bodyItem.classList.add('list-group-item');
+                        bodyItem.textContent = releaseTarget.packageName;
+                        bodyItemList.push(bodyItem);
+                      }
+                  })
+                  const specList = document.querySelector('.col-md-6:first-child ul');
+                  const bodyList = document.querySelector('.col-md-6:last-child ul');
+
+                  // Clear the list
+                  specList.innerHTML = '';
+                  bodyList.innerHTML = '';
+
+                  // Append the items to the list
+                  specItemList.forEach(specItem => specList.appendChild(specItem))
+                  bodyItemList.forEach(bodyItem => bodyList.appendChild(bodyItem))
+
+                  alert('Release target list has been loaded.');
+              })
+              .catch(error => {
+                alert('An error occurred while loading the release target list.');
+              }).finally(() => {
+                enableAllUserActions();
+              });
+      }
+
+      function releasePackage() {
+        disableAllUserActions();
+        const server = document.getElementById('deployServer').value;
+        if (!server) {
+          alert('Please enter the server to deploy to.');
+          enableAllButtons();
+          return;
+        }
+
+        const requestUrl = new URL('/api/v1/releases', window.location.origin);
+        const resourceSheetName = document.getElementById('resourceSheetName').value;
+        if (resourceSheetName) {
+          requestUrl.searchParams.append('sheetName', resourceSheetName);
+        }
+        fetch(requestUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ server })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "fail") {
+            alert(data.message);
+            return;
+          }
+
+          const packageNameList = data.data.map(releaseTarget => releaseTarget.packageName);
+          alert(`The following packages have been deployed: ${packageNameList.join(', ')}`);
+          const specList = document.querySelector('.col-md-6:first-child ul');
+          const bodyList = document.querySelector('.col-md-6:last-child ul');
+
+          // Clear the list
+          specList.innerHTML = '';
+          bodyList.innerHTML = '';
+        })
+        .catch(error => {
+          alert('An error occurred while deploying the package.');
+        }).finally(() => {
+          enableAllUserActions();
+        });
+      }
+    </script>
+  </body>
+</html>
