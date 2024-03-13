@@ -64,10 +64,19 @@ export const getReleaseTargetList = (rows: Row[]): ReleaseTarget[] => {
     );
   });
 
+  const notReleaseList = rows
+    .filter((row) => {
+      const uiRelation: string = row.getCellFilteredByHeaderLabel("UI")?.value ?? "";
+      return uiRelation !== "N" && row.existsCellValueByHeaderLabel("OBJECT NAME") ? true : false;
+    })
+    .map((row) => row.getCellFilteredByHeaderLabel("OBJECT NAME")!.value.trim());
+
   const releaseTargetNames = [...new Set(releaseList.map((release) => release.packageName))];
 
   return releaseTargetNames.map((packageName) => {
-    const packageItems = releaseList.filter((release) => release.packageName === packageName);
+    const packageItems = releaseList.filter(
+      (release) => release.packageName === packageName && !notReleaseList.includes(packageName)
+    );
 
     return new ReleaseTarget(
       packageName,
