@@ -33,6 +33,9 @@ const executeSqlList = async (
     }
   } catch (error) {
     logger.error(`Error: ${error}`);
+    if (tryCount === 0) {
+      await connection.execute(ORACLE.GET_DDL_QUERY);
+    }
     errorSqlList.push(currentSql);
   }
 
