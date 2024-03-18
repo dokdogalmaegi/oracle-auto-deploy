@@ -73,17 +73,23 @@ export const getReleaseTargetList = (rows: Row[]): ReleaseTarget[] => {
 
   const releaseTargetNames = [...new Set(releaseList.map((release) => release.packageName))];
 
-  return releaseTargetNames.map((packageName) => {
-    const packageItems = releaseList.filter(
-      (release) => release.packageName === packageName && !notReleaseList.includes(packageName)
-    );
+  return releaseTargetNames
+    .map((packageName) => {
+      const packageItems = releaseList.filter(
+        (release) => release.packageName === packageName && !notReleaseList.includes(packageName)
+      );
 
-    return new ReleaseTarget(
-      packageName,
-      packageItems.some((item) => item.isModifySpec),
-      packageItems.some((item) => item.isModifyBody)
-    );
-  });
+      if (packageItems.length > 0) {
+        return new ReleaseTarget(
+          packageName,
+          packageItems.some((item) => item.isModifySpec),
+          packageItems.some((item) => item.isModifyBody)
+        );
+      } else {
+        return null;
+      }
+    })
+    .filter((releaseTarget): releaseTarget is ReleaseTarget => !!releaseTarget);
 };
 
 const updatePackageSource = async () => {

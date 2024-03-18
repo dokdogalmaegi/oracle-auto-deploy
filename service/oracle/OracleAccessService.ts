@@ -56,7 +56,10 @@ const executeSqlList = async (
   }
 };
 
-const getInvalidRelaseTarget = async (releaseTargetQueries: ReleaseTargetQuery[], connection: OracleDB.Connection) => {
+const getInvalidRelaseTarget = async (
+  releaseTargetQueries: ReleaseTargetQuery[],
+  connection: OracleDB.Connection
+): Promise<ReleaseTargetQuery[]> => {
   const invalidReleaseTargetList: ReleaseTargetQuery[] = releaseTargetQueries;
   const invalidSpecList: ReleaseTargetQuery[] = [];
   const invalidBodyList: ReleaseTargetQuery[] = [];
@@ -140,6 +143,8 @@ export const executeReleaseTargetQueryListFrom = async (
 
   const invalidReleaseTarget = await getInvalidRelaseTarget(releaseTargetQueries, connection);
   if (invalidReleaseTarget.length > 0) {
+    logger.warn(`invalidReleaseTarget names: ${invalidReleaseTarget.join(", ")}`);
+
     if (tryCount < maxTryCount) {
       logger.warn(`Retry compiling SQL on ${invalidReleaseTarget.length} SQLs on ${server} server.`);
       logger.warn(
