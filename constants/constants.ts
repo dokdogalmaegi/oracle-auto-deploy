@@ -22,4 +22,9 @@ export const LOGGER = {
 
 export const ORACLE = {
   CONNECTION_TIMEOUT_SECONDS: 10,
+  GET_DDL_QUERY: `
+  BEGIN
+      MSX_DDL_AUTH.RUN_DDL_FORCE;
+  END;
+`
 };

@@ -33,6 +33,9 @@ const executeSqlList = async (
     }
   } catch (error) {
     logger.error(`Error: ${error}`);
+    if (tryCount === 0) {
+      await connection.execute(ORACLE.GET_DDL_QUERY);
+    }
     errorSqlList.push(currentSql);
   }
 
@@ -53,7 +56,10 @@ const executeSqlList = async (
   }
 };
 
-const getInvalidRelaseTarget = async (releaseTargetQueries: ReleaseTargetQuery[], connection: OracleDB.Connection) => {
+const getInvalidRelaseTarget = async (
+  releaseTargetQueries: ReleaseTargetQuery[],
+  connection: OracleDB.Connection
+): Promise<ReleaseTargetQuery[]> => {
   const invalidReleaseTargetList: ReleaseTargetQuery[] = releaseTargetQueries;
   const invalidSpecList: ReleaseTargetQuery[] = [];
   const invalidBodyList: ReleaseTargetQuery[] = [];
@@ -61,7 +67,7 @@ const getInvalidRelaseTarget = async (releaseTargetQueries: ReleaseTargetQuery[]
   const checkInvalidPackageNameList = releaseTargetQueries
     .map((releaseTargetQuery) => "'" + releaseTargetQuery.releaseTarget.packageName + "'")
     .join(",");
-  const checkInvalidSql = `SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY') AND STATUS = 'INVALID' AND OBJECT_NAME IN (${checkInvalidPackageNameList})`;
+  const checkInvalidSql = `SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY') AND OWNER IN ('CRSBETA', 'CRSCUBE') AND STATUS = 'INVALID' AND OBJECT_NAME IN (${checkInvalidPackageNameList})`;
   logger.info(`Check invalid SQL: ${checkInvalidSql}`);
   const result = await connection.execute(checkInvalidSql);
 
@@ -137,6 +143,8 @@ export const executeReleaseTargetQueryListFrom = async (
 
   const invalidReleaseTarget = await getInvalidRelaseTarget(releaseTargetQueries, connection);
   if (invalidReleaseTarget.length > 0) {
+    logger.warn(`invalidReleaseTarget names: ${invalidReleaseTarget.join(", ")}`);
+
     if (tryCount < maxTryCount) {
       logger.warn(`Retry compiling SQL on ${invalidReleaseTarget.length} SQLs on ${server} server.`);
       logger.warn(
