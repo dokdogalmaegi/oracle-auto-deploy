@@ -64,7 +64,7 @@ const getInvalidRelaseTarget = async (releaseTargetQueries: ReleaseTargetQuery[]
   const checkInvalidPackageNameList = releaseTargetQueries
     .map((releaseTargetQuery) => "'" + releaseTargetQuery.releaseTarget.packageName + "'")
     .join(",");
-  const checkInvalidSql = `SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY') AND STATUS = 'INVALID' AND OBJECT_NAME IN (${checkInvalidPackageNameList})`;
+  const checkInvalidSql = `SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY') AND OWNER IN ('CRSBETA', 'CRSCUBE') AND STATUS = 'INVALID' AND OBJECT_NAME IN (${checkInvalidPackageNameList})`;
   logger.info(`Check invalid SQL: ${checkInvalidSql}`);
   const result = await connection.execute(checkInvalidSql);
 
