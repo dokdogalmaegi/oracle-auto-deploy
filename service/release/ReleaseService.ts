@@ -40,7 +40,7 @@ export const getRowsWithHeaderColumn = async (
   }
 };
 
-const isReleaseTargetRow = (row: Row): boolean => {
+const isReleaseTargetRow = (row: Row, uiStatusList: string[]): boolean => {
   const modifyTable = row.existsCellValueByHeaderLabel("MODIFIED_T");
   const modifyData = row.existsCellValueByHeaderLabel("MODIFIED_D");
   if (modifyTable || modifyData) {
@@ -52,22 +52,27 @@ const isReleaseTargetRow = (row: Row): boolean => {
   const modifySpec = row.existsCellValueByHeaderLabel("MODIFIED_S");
   const modifyBody = row.existsCellValueByHeaderLabel("MODIFIED_B");
 
-  return status === "R" && uiRelation === "N" && (modifySpec || modifyBody) ? true : false;
+  return status === "R" && uiStatusList.includes(uiRelation) && (modifySpec || modifyBody) ? true : false;
 };
 
-export const getReleaseTargetList = (rows: Row[]): ReleaseTarget[] => {
-  const releaseList = rows.filter(isReleaseTargetRow).map((row) => {
-    return new ReleaseTarget(
-      row.getCellFilteredByHeaderLabel("OBJECT NAME")!.value.trim(),
-      row.getCellFilteredByHeaderLabel("MODIFIED_S")!.value.length > 0,
-      row.getCellFilteredByHeaderLabel("MODIFIED_B")!.value.length > 0
-    );
-  });
+export const getReleaseTargetList = (rows: Row[], uiStatusList: string[] | null): ReleaseTarget[] => {
+  const releaseUiStatusList = uiStatusList ?? ["N"];
+  const releaseList = rows
+    .filter((row) => isReleaseTargetRow(row, releaseUiStatusList ?? ["N"]))
+    .map((row) => {
+      return new ReleaseTarget(
+        row.getCellFilteredByHeaderLabel("OBJECT NAME")!.value.trim(),
+        row.getCellFilteredByHeaderLabel("MODIFIED_S")!.value.length > 0,
+        row.getCellFilteredByHeaderLabel("MODIFIED_B")!.value.length > 0
+      );
+    });
 
   const notReleaseList = rows
     .filter((row) => {
       const uiRelation: string = row.getCellFilteredByHeaderLabel("UI")?.value ?? "";
-      return uiRelation !== "N" && row.existsCellValueByHeaderLabel("OBJECT NAME") ? true : false;
+      return !releaseUiStatusList.includes(uiRelation) && row.existsCellValueByHeaderLabel("OBJECT NAME")
+        ? true
+        : false;
     })
     .map((row) => row.getCellFilteredByHeaderLabel("OBJECT NAME")!.value.trim());
 
