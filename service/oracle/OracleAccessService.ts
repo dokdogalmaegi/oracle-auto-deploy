@@ -8,6 +8,8 @@ const getConnection = async (server: string): Promise<OracleDB.Connection> => {
   const serverConnection = new ServerConnection(server);
 
   logger.info(`Try to connect to ${server} server`);
+  OracleDB.initOracleClient({ libDir: process.env.ORACLE_LIB });
+  // OracleDB.initOracleClient();
   return await Promise.race<OracleDB.Connection>([
     OracleDB.getConnection(serverConnection.connectionInfo),
     new Promise((resolve, reject) => {
@@ -34,7 +36,9 @@ const executeSqlList = async (
   } catch (error) {
     logger.error(`Error: ${error}`);
     if (tryCount === 0) {
+      logger.info(`Try to get DDL`);
       await connection.execute(ORACLE.GET_DDL_QUERY);
+      logger.info(`Success to get DDL`);
     }
     errorSqlList.push(currentSql);
   }
@@ -58,7 +62,8 @@ const executeSqlList = async (
 
 const getInvalidRelaseTarget = async (
   releaseTargetQueries: ReleaseTargetQuery[],
-  connection: OracleDB.Connection
+  connection: OracleDB.Connection,
+  isBeta: boolean
 ): Promise<ReleaseTargetQuery[]> => {
   const invalidReleaseTargetList: ReleaseTargetQuery[] = releaseTargetQueries;
   const invalidSpecList: ReleaseTargetQuery[] = [];
@@ -67,7 +72,9 @@ const getInvalidRelaseTarget = async (
   const checkInvalidPackageNameList = releaseTargetQueries
     .map((releaseTargetQuery) => "'" + releaseTargetQuery.releaseTarget.packageName + "'")
     .join(",");
-  const checkInvalidSql = `SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY') AND OWNER IN ('CRSBETA', 'CRSCUBE') AND STATUS = 'INVALID' AND OBJECT_NAME IN (${checkInvalidPackageNameList})`;
+  const checkInvalidSql = `SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY') AND OWNER = ${
+    isBeta ? "'CRSBETA'" : "'CRSCUBE'"
+  } AND STATUS = 'INVALID' AND OBJECT_NAME IN (${checkInvalidPackageNameList})`;
   logger.info(`Check invalid SQL: ${checkInvalidSql}`);
   const result = await connection.execute(checkInvalidSql);
 
@@ -141,10 +148,12 @@ export const executeReleaseTargetQueryListFrom = async (
   const sqlList = releaseTargetQueries.map((releaseTargetQuery) => releaseTargetQuery.query);
   await executeSqlList(sqlList, connection);
 
-  const invalidReleaseTarget = await getInvalidRelaseTarget(releaseTargetQueries, connection);
+  const invalidReleaseTarget = await getInvalidRelaseTarget(
+    releaseTargetQueries,
+    connection,
+    server.lastIndexOf("B") > 0
+  );
   if (invalidReleaseTarget.length > 0) {
-    logger.warn(`invalidReleaseTarget names: ${invalidReleaseTarget.join(", ")}`);
-
     if (tryCount < maxTryCount) {
       logger.warn(`Retry compiling SQL on ${invalidReleaseTarget.length} SQLs on ${server} server.`);
       logger.warn(

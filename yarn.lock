@@ -2968,10 +2968,10 @@ onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-oracledb@^6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/oracledb/-/oracledb-6.3.0.tgz#998694f76ae0b7a30f95c9ac7bfcfd84480eca6d"
-  integrity sha512-fr3U66QxgGXb5cs/ozLBQU50TMbZcBQEWvSaj2rJAXG8KRrsZcGOK8JTlZL1yJHeW8cSjOm6n/wTw3SJksGjDg==
+oracledb@^6.4.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/oracledb/-/oracledb-6.4.0.tgz#aac1e4daa73366169976bf96a8b995b1f664d785"
+  integrity sha512-TJI08qzQlf/l7T49VojP9BoQpjEr14NXZmpSzzcLrbNs7qSl0QA/Mc9gGiEdkg5WmwH0wqUjtMC7jlf1WamlYA==
 
 p-limit@^2.2.0:
   version "2.3.0"
