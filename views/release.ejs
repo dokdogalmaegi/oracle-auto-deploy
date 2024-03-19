@@ -30,8 +30,11 @@
         <div class="col-md-6 text-center">
           <input type="text" class="form-control mb-3" id="resourceSheetName" placeholder="Please enter the base sheetname of the resource.">
         </div>
-        <div class="col-md-6 text-center">
+        <div class="col-md-3 text-center">
           <input type="text" class="form-control mb-3" id="deployServer" onkeydown="if(event.keyCode==13) releasePackage()" placeholder="Please enter the server to deploy to.">
+        </div>
+        <div class="col-md-3 text-center">
+          <input type="text" class="form-control mb-3" id="deployStatus" onkeydown="if(event.keyCode==13) releasePackage()" placeholder="Please enter the release status.">
         </div>
       </div>    
       <div class="row justify-content-center">
@@ -115,6 +118,11 @@
           if (resourceSheetName) {
             requestUrl.searchParams.append('sheetName', resourceSheetName);
           }
+
+          const deployStatus = document.getElementById('deployStatus').value;
+          if (deployStatus) {
+            requestUrl.searchParams.append('uiStatus', deployStatus);
+          }
           fetch(requestUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } } )
               .then(response => response.json())
               .then(data => {
@@ -165,7 +173,7 @@
         const server = document.getElementById('deployServer').value;
         if (!server) {
           alert('Please enter the server to deploy to.');
-          enableAllButtons();
+          enableAllUserActions();
           return;
         }
 
@@ -179,7 +187,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ server })
+          body: JSON.stringify({ server, uiStatus: document.getElementById('deployStatus').value })
         })
         .then(response => response.json())
         .then(data => {
