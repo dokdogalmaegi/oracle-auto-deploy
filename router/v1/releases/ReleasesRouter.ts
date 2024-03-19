@@ -51,14 +51,17 @@ releasesV1Router.post(
     const headerColumns = await googleSheet.getHeaderColumnFromTwoRows(sheetName as string | undefined);
     const rows = await getRowsWithHeaderColumn(headerColumns, sheetName as string | undefined);
 
-    const uiStatusList =
-      uiStatus
-        .split(",")
-        .filter((s: string) => s.length > 0)
-        .map((s: string) => s.trim()) ?? null;
-    const invalidUiStatusList = uiStatusList?.filter((s: string) => s.length !== 1);
-    if (invalidUiStatusList && invalidUiStatusList.length > 0) {
-      throw new Error(`Invalid UI status: ${invalidUiStatusList}`);
+    let uiStatusList: string[] | null = null
+    if (uiStatus) {
+      uiStatusList =
+        uiStatus
+          .split(",")
+          .filter((s: string) => s.length > 0)
+          .map((s: string) => s.trim());
+      const invalidUiStatusList = uiStatusList?.filter((s: string) => s.length !== 1);
+      if (invalidUiStatusList && invalidUiStatusList.length > 0) {
+        throw new Error(`Invalid UI status: ${invalidUiStatusList}`);
+      }
     }
     const releaseTargetList = getReleaseTargetList(rows, uiStatusList);
 

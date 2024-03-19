@@ -98,7 +98,8 @@ export const getReleaseTargetList = (rows: Row[], uiStatusList: string[] | null)
 };
 
 const updatePackageSource = async () => {
-  await execPromise(`cd ${process.env.REPOSITORY_PATH} && git pull origin ${process.env.PACKAGE_BRANCH}`);
+  const log = await execPromise(`cd ${process.env.REPOSITORY_PATH} && git pull origin ${process.env.PACKAGE_BRANCH}`);
+  logger.info(`git log\nstdout: ${log.stdout}\nstderr: ${log.stderr}`)
 };
 
 const getPackage = (packageName: string): { specSql: string; bodySql: string } => {
