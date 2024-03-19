@@ -24,7 +24,11 @@ releasesV1Router.get(
         .filter((s: string) => s.length > 0)
         .map((s: string) => s.trim());
     }
-    console.log(sheetName);
+
+    const invalidUiStatusList = uiStatusList?.filter((s: string) => s.length !== 1);
+    if (invalidUiStatusList && invalidUiStatusList.length > 0) {
+      throw new Error(`Invalid UI status: ${invalidUiStatusList}`);
+    }
     const releaseTargetList = getReleaseTargetList(rows, uiStatusList);
     logger.info(`Success to get release target data.\ndata: ${JSON.stringify(releaseTargetList)}`);
 
@@ -52,6 +56,10 @@ releasesV1Router.post(
         .split(",")
         .filter((s: string) => s.length > 0)
         .map((s: string) => s.trim()) ?? null;
+    const invalidUiStatusList = uiStatusList?.filter((s: string) => s.length !== 1);
+    if (invalidUiStatusList && invalidUiStatusList.length > 0) {
+      throw new Error(`Invalid UI status: ${invalidUiStatusList}`);
+    }
     const releaseTargetList = getReleaseTargetList(rows, uiStatusList);
 
     await releasePackage(releaseTargetList, server);
