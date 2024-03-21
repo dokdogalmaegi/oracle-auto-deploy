@@ -51,8 +51,11 @@ const isReleaseTargetRow = (row: Row, uiStatusList: string[]): boolean => {
   const uiRelation = row.getCellFilteredByHeaderLabel("UI")?.value ?? "";
   const modifySpec = row.existsCellValueByHeaderLabel("MODIFIED_S");
   const modifyBody = row.existsCellValueByHeaderLabel("MODIFIED_B");
+  const group = row.getCellFilteredByHeaderLabel("GROUP")?.value ?? "";
 
-  return status === "R" && uiStatusList.includes(uiRelation) && (modifySpec || modifyBody) ? true : false;
+  return status === "R" && uiStatusList.includes(uiRelation) && (modifySpec || modifyBody) && group !== "CRSMAIL"
+    ? true
+    : false;
 };
 
 export const getReleaseTargetList = (rows: Row[], uiStatusList: string[] | null): ReleaseTarget[] => {
@@ -99,7 +102,7 @@ export const getReleaseTargetList = (rows: Row[], uiStatusList: string[] | null)
 
 const updatePackageSource = async () => {
   const log = await execPromise(`cd ${process.env.REPOSITORY_PATH} && git pull origin ${process.env.PACKAGE_BRANCH}`);
-  logger.info(`git log\nstdout: ${log.stdout}\nstderr: ${log.stderr}`)
+  logger.info(`git log\nstdout: ${log.stdout}\nstderr: ${log.stderr}`);
 };
 
 const getPackage = (packageName: string): { specSql: string; bodySql: string } => {

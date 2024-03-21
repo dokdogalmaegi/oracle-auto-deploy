@@ -8,8 +8,9 @@ const getConnection = async (server: string): Promise<OracleDB.Connection> => {
   const serverConnection = new ServerConnection(server);
 
   logger.info(`Try to connect to ${server} server`);
-  OracleDB.initOracleClient({ libDir: process.env.ORACLE_LIB });
-  // OracleDB.initOracleClient();
+  if (server.indexOf("_C") > 0) {
+    OracleDB.initOracleClient({ libDir: process.env.ORACLE_LIB });
+  }
   return await Promise.race<OracleDB.Connection>([
     OracleDB.getConnection(serverConnection.connectionInfo),
     new Promise((resolve, reject) => {
@@ -39,8 +40,10 @@ const executeSqlList = async (
       logger.info(`Try to get DDL`);
       await connection.execute(ORACLE.GET_DDL_QUERY);
       logger.info(`Success to get DDL`);
+      errorSqlList.push(...sqlList);
+    } else {
+      errorSqlList.push(currentSql);
     }
-    errorSqlList.push(currentSql);
   }
 
   if (errorSqlList.length > 0) {
